@@ -1,0 +1,30 @@
+# PEP 621 compliant
+[build-system]
+# Minimum requirements for the build system to execute.
+requires = ["setuptools", "wheel", "Cython", "numpy"]  # PEP 508 specifications.
+
+
+[project]
+name = "nn_stats"
+version = "2024.10.14" 
+description = "nearest neighboors estimates of local averages"
+# readme = "README.rst"
+authors = [{name = "Nicolas B. Garnier", email = "nicolas.garnier@ens-lyon.fr"}]
+maintainers = [{name = "Nicolas B. Garnier", email = "nicolas.garnier@ens-lyon.fr"}]
+requires-python = ">=3.7"
+keywords = ["nearest neighbors", "statistics#"]
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    "Development Status :: 2 - Beta",
+    "Programming Language :: Python :: 3"]
+dependencies = ['importlib-metadata', 'numpy']
+# dynamic = ["version", "description"]
+
+
+[project.urls]
+#Homepage = "https://example.com"
+#Documentation = "https://readthedocs.org"
+Repository = "https://github.com/nbgarnier/entropy"
+#Changelog = "https://github.com/nbgarnier/entropy/blob/master/CHANGELOG.md"
+
+
