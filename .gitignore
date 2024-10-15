@@ -16,7 +16,6 @@ src/cython/doc/*
 src/cython/entropy.egg-info/* 
 src/cython/tests/* 
 src/cython/tools.old/* 
-
 .DS_Store 
 config.h 
 config.h.in~ 
