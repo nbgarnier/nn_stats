@@ -2,6 +2,7 @@
 *.gz 
 *.html 
 autom4te.cache/ 
+#bin/.ipynb_checkpoints
 include/math_tools.h 
 include/nn_stats.h
 lib/*.a  
