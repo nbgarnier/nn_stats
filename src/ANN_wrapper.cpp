@@ -265,8 +265,12 @@ int ANN_count_nearest_neighbors(double *x, double epsilon, int core)
 /* A    : is a vector of observable of size Npts,                                      */
 /*          where Npts is the same as the location data the tree is built upon         */
 /* k    : is the rank of the neighbor to search for                                    */
+/* npts_out: nb of points in the output                                                */
+/* nA      : nb of observables                                                         */
 /* output parameters:                                                                  */
-/* (returned) : distance of the k-nn from x                                            */
+/* R    : distance of the k-nn from x                                                  */
+/* mean : expected values of observables                                               */
+/* var  : variance of observables                                                      */
 /*                                                                                     */
 /* 2024-10-07 - first version                                                          */
 /* 2024-10-14 - draft for returning distance : to do: check max index                  */
