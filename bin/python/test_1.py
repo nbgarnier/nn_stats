@@ -78,7 +78,7 @@ print("output positions :", y.shape)
 
 print("\nfixed k =", k, end=" ")
 [A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=k)
-print("output values of size", A_mean.shape, "and", dists.shape)
+print("output values of size", A_mean.shape, A_var.shape, "and", dists.shape)
 #print(A_mean)
 #print(dists)
 
@@ -99,7 +99,7 @@ P2.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists, marker='o')
 
 print("\nfixed R =", R, end=" ")
 A_mean, A_var, nnn = ns.compute_local_stats(pos, val, y, R=R)
-#print("output values of size", A_mean.shape)
+print("output values of size", A_mean.shape, A_var.shape, "and", nnn.shape)
 
 P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean*nnn, marker='o')
 
