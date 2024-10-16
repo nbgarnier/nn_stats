@@ -25,7 +25,7 @@
 
 #define ANN_PTS_PER_THREAD   (117*16)    // see function "adapt_cores_number"
 
-// global variables (defined for real in "entropy_ann_threads.c") 
+// global variables (defined for real nowhere) 
 extern int USE_PTHREAD;
 extern int _n_cores; 
 

@@ -31,7 +31,7 @@ extern "C" {
     double ANN_find_distance_in         (int i,     int n, int k, int core); // new 2019, 2021-12-01
     double ANN_find_distance_ex         (double *x, int n, int k, int core); // new 2019
     int ANN_count_nearest_neighbors     (double *x, double epsilon, int core); //  new 2019, changed 2024
-    double ANN_compute_stats            (double *x, double *A, int k, double *R, double *mean, double *var, int npts_out, int nA, int core); // new 2024
+//    double ANN_compute_stats            (double *x, double *A, int k, double *R, double *mean, double *var, int npts_out, int nA, int core); // new 2024
     
     void free_ANN    (int nb_cores);
 #ifdef __cplusplus

@@ -15,6 +15,7 @@
 
 #include "ANN_threads.h"
 #include "ANN_wrapper.h"
+#include "ANN_stats.h"
 #include "library_commons.h"   // for tree_k_max
 
 
