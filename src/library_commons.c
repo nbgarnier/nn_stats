@@ -22,6 +22,7 @@ int lib_warning_level=1; // 0 : no physical checks, code trusts user / user is r
                         // 2  : physical checks raises errors 
                         //      (1 or 2 helps the user, but limits advanced use of the library)
 
+const int k_default = 5;    // constant to be used globally (including in other source .c files, and cython)
 int tree_k_max=5;
 
 /****************************************************************************************/

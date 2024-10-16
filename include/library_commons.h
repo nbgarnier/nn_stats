@@ -39,7 +39,6 @@ struct embedding_parameters {
 typedef struct embedding_parameters embed_param; 
 
 /**********************************************************************************************************/
-//const int k_default = 5;    // constant to be used globally (including in other source .c files, and cython)
 extern int tree_k_max;      // for safety checks
 #endif
 

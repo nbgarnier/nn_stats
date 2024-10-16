@@ -31,8 +31,7 @@
 #define noDEBUG_EXPORT
 #define LOOK 17 	// for debug also (of which point(s) will we save the data ?)
 
-// constant to be used globally (including in other source .c files, and cython)
-const int k_default = 5;
+
 
 #ifdef DEBUG
 /* 2018-04-11/3: test of memory alignment: */

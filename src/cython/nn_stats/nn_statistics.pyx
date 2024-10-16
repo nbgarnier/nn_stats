@@ -57,8 +57,29 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y, 
         return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(dists)
     if (R>0):   
         nnn   = PNP.zeros((1,npts_out), dtype=PNP.intc) # tmp version
-        #ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R, &A_mean[0,0], &A_var[0,0], &nnn[0,0])
+        ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R, &A_mean[0,0], &A_var[0,0], &nnn[0,0])
         print(A_mean)
         print(nnn)
         return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(nnn)
+
+
+
+def set_nn_max(int k=nn_statistics.k_default):
+    """
+    sets the maximal value of allowed number of nearest neighbors
+    
+    :param k: an integer (default=5)
+    :returns: no output
+    """
+    nn_statistics.tree_k_max=k
+    
+def get_nn():
+    """
+    gets the current maximal value of allowed number of nearest neighbors
+    
+    :param none:
+    :returns: an integer
+    """
+    return(nn_statistics.tree_k_max)
+
 
