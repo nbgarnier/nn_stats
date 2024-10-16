@@ -68,7 +68,7 @@ void *threaded_stats_fixed_R_func(void *ptr)
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
         k = ANN_count_nearest_neighbors(queryPt, R, core);
-        printf("found k=%d  ", k);
+//        printf("found k=%d  ", k);
         if (k>=tree_k_max)
         {   for (d=0; d<nA; d++)
             {   (obs_mean.A+i)[obs_mean.Npts*d] = my_NAN;
