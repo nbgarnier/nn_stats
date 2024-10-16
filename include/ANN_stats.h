@@ -1,10 +1,8 @@
 //----------------------------------------------------------------------
 // File:			ANN_stats.h
 //		
-// Description:	header file for ANN_wrapper.c, to use ANN in C
-// This is a C header, and ANN_wrapper.cpp is a cpp file
+// Description:	header file for ANN_stats.cpp
 //
-// 2021-12-01 : added parameters "core" and "nb_cores" for multithreading
 //----------------------------------------------------------------------
 #ifndef ANN_STATS_H
 #define ANN_STATS_H

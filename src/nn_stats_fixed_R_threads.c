@@ -11,12 +11,12 @@
 #include <stdio.h>      // for printf
 #include <string.h>     // for malloc
 #include <pthread.h>
-#include "data.h"       // for data structs
 
 #include "ANN_threads.h"
 #include "ANN_wrapper.h"
 #include "ANN_stats.h"
 #include "library_commons.h"   // for tree_k_max
+#include "data.h"       // for data structs
 
 
 // thread arguments and outputs types:

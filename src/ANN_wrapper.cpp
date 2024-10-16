@@ -16,7 +16,7 @@
 //----------------------------------------------------------------------
 #define noDEBUG
 #define DEBUG_N 37
-
+ 
 #include "ANN/ANN.h"
 #include "ANN_wrapper.h"        // definitions of functions only
 //#include <stdio.h>              // for printf, to be removed
@@ -59,10 +59,10 @@ ANNdistArray   *dists;          // k-nn distances  // 2021, adapted for pthread
 ANNkd_tree*	    kdTree;         // search structure
 
 // global variables for the subtrees, internal to the C++ code, but exposed only in ANN_Wrapper.cpp:
-ANNpointArray   dataPts_1;      // data points, type (*(*double))
+//ANNpointArray   dataPts_1;      // data points, type (*(*double))
 // ANNidxArray    *nnIdx_1;        // near neighbor indices
 // ANNdistArray   *dists_1;        // near neighbor distances
-ANNkd_tree*     kdTree_1;       // search structure
+//ANNkd_tree*     kdTree_1;       // search structure
  
 // allocate function (housekeeping) :
 int init_ANN(int maxPts, int dim, int max_k, int NCORES=1)
@@ -253,3 +253,24 @@ int ANN_count_nearest_neighbors(double *x, double epsilon, int core)
                         core)); 
 }
 
+
+
+// free_function (housekeeping) :
+void free_ANN(int NCORES)
+{   
+//    delete [] ANNkdDim;
+//    annDeallocPts(ANNkdQ);
+//    delete [] ANNkdPointMK;
+    
+    for (int i=0; i<NCORES; i++) { delete nnIdx[i]; }   delete [] nnIdx;
+    for (int i=0; i<NCORES; i++) { delete dists[i]; }   delete [] dists;
+    annDeallocPts(dataPts);
+    delete kdTree;             // clean main tree
+    
+    annClose();                // done with ANN
+}
+
+
+// a quick fix to a compiler/linker bug:
+// https://stackoverflow.com/questions/75139508/c-extension-for-python-throws-symbol-not-found-in-flat-namespace-zl10func1
+#include "ANN_stats.cpp"

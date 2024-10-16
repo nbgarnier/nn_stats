@@ -8,7 +8,7 @@
 //----------------------------------------------------------------------
 #ifndef ANN_WRAPPER_H
 #define ANN_WRAPPER_H
-
+ 
 #ifdef __cplusplus
 extern "C" {
 #endif
