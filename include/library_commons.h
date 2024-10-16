@@ -39,6 +39,7 @@ struct embedding_parameters {
 typedef struct embedding_parameters embed_param; 
 
 /**********************************************************************************************************/
+extern const int k_default;
 extern int tree_k_max;      // for safety checks
 #endif
 
