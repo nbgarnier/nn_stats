@@ -9,7 +9,7 @@ rng = default_rng()
 
 pi = np.pi
 k=150
-R=1
+R=1.8
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -64,7 +64,7 @@ def Disk(radius, Npts=100, center=(0,0)):
     return xx+center[0], yy+center[1]
 #%%
 
-pos=np.array(Disk(5, Npts=1000), dtype=float)
+pos=np.array(Disk(5, Npts=10000), dtype=float)
 val=np.ones((1,pos.shape[1]), dtype=float)
 print("input positions :", pos.shape, "with observables :", val.shape)
 
@@ -73,14 +73,14 @@ Nx_out = 5
 a = np.arange(1,Nx_out+1)*2-(Nx_out+1)
 b = np.ones(Nx_out+1)
 y = np.array((np.outer(a,b).flatten(),np.outer(b,a).flatten()), dtype=float)
-print("output grid of size :", y.shape)
+print("output positions :", y.shape)
 #print(y)
 
-print("fixed k =", k, end=" ")
+print("\nfixed k =", k, end=" ")
 [A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=k)
-print("output values of size", A_mean.shape)
-print(A_mean)
-print(dists)
+print("output values of size", A_mean.shape, "and", dists.shape)
+#print(A_mean)
+#print(dists)
 
 ns.multithreading(1)
 
@@ -95,12 +95,12 @@ P1.scatter(pos[0], pos[1], edgecolor='b', facecolor='none', alpha=0.5 )
 #P2.contour(A_mean.reshape((Nx_out, Nx_out-1)))
 #P2.imshow(A_mean.reshape((Nx_out+1, Nx_out)))
 P2.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists, marker='o')
-print(A_mean)
 
-print("fixed R =", R, end=" ")
+
+print("\nfixed R =", R, end=" ")
 A_mean, A_var, nnn = ns.compute_local_stats(pos, val, y, R=R)
 #print("output values of size", A_mean.shape)
 
-P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean, marker='o')
+P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean*nnn, marker='o')
 
 Fig.savefig("essai.pdf")

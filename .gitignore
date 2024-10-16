@@ -1,6 +1,7 @@
 *.o
 *.gz 
 *.html 
+*.pdf
 autom4te.cache/ 
 #bin/.ipynb_checkpoints
 include/math_tools.h 

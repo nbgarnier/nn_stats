@@ -15,7 +15,7 @@
 
 #include "ANN_threads.h"
 #include "ANN_wrapper.h"
-//#include "library_commons.h"   // for is_zero()
+#include "library_commons.h"   // for tree_k_max
 
 
 // thread arguments and outputs types:
@@ -61,14 +61,23 @@ void *threaded_stats_fixed_R_func(void *ptr)
     int n_eff    = i_end-i_start, // how many points in this thread
         l_errors = 0;
     double rad   = 0.;
+    double ratou[2];
 
     double queryPt[nx]; // to be optimized
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
         k = ANN_count_nearest_neighbors(queryPt, R, core);
-        rad = ANN_compute_stats(queryPt, obs_in.A, k, NULL, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
+        printf("found k=%d  ", k);
+        if (k>=tree_k_max)
+        {   for (d=0; d<nA; d++)
+            {   (obs_mean.A+i)[obs_mean.Npts*d] = my_NAN;
+                (obs_var.A +i)[obs_mean.Npts*d] = my_NAN;
+            }
+        }
+        else rad = ANN_compute_stats(queryPt, obs_in.A, k, ratou, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
         
+        nnn_out.A[i] = k;
     }
     
     out->n_eff    = n_eff;
@@ -116,8 +125,8 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
     // 2022-12-13: all other threads number manipulation should be done outside of this engine function!
     npts_eff_min   = (npts_out - (npts_out%nb_cores))/nb_cores;  // nb pts mini dans chaque thread
     
-    int max_k = npts_in/10; // 2024-10-08, quick start, not optimized (memory)
-	init_ANN(npts_in, nx, max_k, nb_cores); 	// pb with unknow k...
+    tree_k_max = npts_in/10; // 2024-10-08, quick start, not optimized (memory)
+	init_ANN(npts_in, nx, tree_k_max, nb_cores); 	// pb with unknow k...
     create_kd_tree(x, npts_in, nx);
 
     pthread_t    thread[nb_cores];
