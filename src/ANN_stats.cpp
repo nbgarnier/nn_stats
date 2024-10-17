@@ -35,7 +35,7 @@ extern ANNkd_tree*	    kdTree;     // search structure
 
 
 /***************************************************************************************/
-/* below : piece of code to search for nearest neighbors of a point                    */
+/* below : piece of code to average observables over nearest neighbors of a point      */
 /*         using a previously computed kd-tree (with ANN library)                      */
 /* faster and memory efficient coding                                                  */
 /*                                                                                     */
@@ -55,7 +55,7 @@ extern ANNkd_tree*	    kdTree;     // search structure
 /* 2024-10-14 - draft for returning distance : to do: check max index                  */
 /* 2024-10-15 - factorized loop on observables                                         */
 /***************************************************************************************/
-double ANN_compute_stats(double *x, double *A, int k, double *R, double *mean, double *var, int npts_out, int nA, int core)
+double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double *mean, double *var, int npts_out, int nA, int core)
 {   int i, d, ind, N=k-1+ANN_ALLOW_SELF_MATCH;
     int npts=kdTree->nPoints();
     double tmp, m=0., v=0.;
@@ -85,5 +85,49 @@ double ANN_compute_stats(double *x, double *A, int k, double *R, double *mean, d
 //    printf("k=%d, N=%d, allow=%d   ", k, N, ANN_ALLOW_SELF_MATCH);
 //    return(0);
     return((double)dists[core][N-1]);
-} /* end of function "ANN_compute_stats" ***********************************************/
+} /* end of function "ANN_compute_stats_single_k" ***********************************************/
 
+
+
+
+/****************************************************************************************/
+/* same as above, but for a set of prescribed values of numbers k                       */
+/*                                                                                      */
+/* 2024-10-15 - factorized loop on observables                                          */
+/****************************************************************************************/
+double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R, double *mean, double *var, int npts_out, int nA, int core)
+{   int i, d, ind, N;
+    int npts=kdTree->nPoints();
+    double tmp, m=0., v=0.;
+    int ind_k, k_max=k[Nk-1];
+
+    kdTree->annkSearch(x,                       // query point
+                       k_max+ANN_ALLOW_SELF_MATCH,  // number of near neighbors (including or excluding central point)
+                       nnIdx[core],             // nearest neighbors (returned)
+                       dists[core],             // distance (returned)
+                       ANN_eps);
+
+    for (ind_k=0; ind_k<Nk; ind_k++)
+    {   N=k[ind_k]-1+ANN_ALLOW_SELF_MATCH;
+        for (d=0; d<nA; d++)
+        {   m=0.; v=0.;
+            for (i=0; i<N; i++)
+            {   ind = nnIdx[core][i];
+                tmp = (A+npts*d)[ind]; 
+                m  += tmp;  v += tmp*tmp;
+            }
+            v -= m*m/N;
+            m /= N;
+            v /= N-1; // unbiased estimator
+
+            mean[npts_out*d] = m;
+            var [npts_out*d] = v;
+
+        }
+        R[0] = (double)dists[core][N-1];
+//    printf("k=%d, N=%d, allow=%d   ", k, N, ANN_ALLOW_SELF_MATCH);
+//    return(0);
+    }
+
+    return((double)dists[core][N-1]);
+} /* end of function "ANN_compute_stats_multi_k" ***********************************************/

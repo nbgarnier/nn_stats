@@ -76,7 +76,7 @@ void *threaded_stats_fixed_R_func(void *ptr)
                 (obs_var.A +i)[obs_mean.Npts*d] = my_NAN;
             }
         }
-        else rad = ANN_compute_stats(queryPt, obs_in.A, k, ratou, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
+        else rad = ANN_compute_stats_single_k(queryPt, obs_in.A, k, ratou, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
         
         nnn_out.A[i] = k;
     }

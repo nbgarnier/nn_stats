@@ -10,7 +10,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    double ANN_compute_stats            (double *x, double *A, int k, double *R, double *mean, double *var, int npts_out, int nA, int core); // new 2024
+    double ANN_compute_stats_single_k(double *x, double *A, int k,          double *R, double *mean, double *var, int npts_out, int nA, int core); // new 2024
+    double ANN_compute_stats_multi_k (double *x, double *A, int *k, int Nk, double *R, double *mean, double *var, int npts_out, int nA, int core); // new 2024
 
 #ifdef __cplusplus
 }

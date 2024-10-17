@@ -66,7 +66,7 @@ void *threaded_stats_fixed_k_func(void *ptr)
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
-        rad = ANN_compute_stats(queryPt, obs_in.A, k, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, obs_mean.dim, core);
+        rad = ANN_compute_stats_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, obs_mean.dim, core);
 //        printf("%1.0f %1.0f -> %1.2f\n", pos_out.A[i], pos_out.A[i+pos_out.Npts], rad);
     }
     
