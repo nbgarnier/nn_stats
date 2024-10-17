@@ -102,5 +102,5 @@ A_mean, A_var, nnn = ns.compute_local_stats(pos, val, y, R=R)
 print("output values of size", A_mean.shape, A_var.shape, "and", nnn.shape)
 
 P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean*nnn, marker='o')
-
+print(nnn)
 Fig.savefig("essai.pdf")
