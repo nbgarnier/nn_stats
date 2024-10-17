@@ -93,12 +93,14 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
 /****************************************************************************************/
 /* same as above, but for a set of prescribed values of numbers k                       */
 /*                                                                                      */
-/* 2024-10-15 - factorized loop on observables                                          */
+/* beware momory usage!!!                                                               */
+/*                                                                                      */
+/* 2024-10-17 - initial fork                                                            */
 /****************************************************************************************/
 double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R, double *mean, double *var, int npts_out, int nA, int core)
 {   int i, d, ind, N;
     int npts=kdTree->nPoints();
-    double tmp, m=0., v=0.;
+    double tmp, m=0., v=0.;     // 2024-10-17: note: make these pointer nA, to optimize computations
     int ind_k, k_max=k[Nk-1];
 
     kdTree->annkSearch(x,                       // query point
@@ -124,7 +126,7 @@ double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R
             var [npts_out*d] = v;
 
         }
-        R[0] = (double)dists[core][N-1];
+        R[ind_k] = (double)dists[core][N-1];
 //    printf("k=%d, N=%d, allow=%d   ", k, N, ANN_ALLOW_SELF_MATCH);
 //    return(0);
     }
