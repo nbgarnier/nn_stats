@@ -51,11 +51,11 @@ zip : clean
 	$(TAR) -rvf code.tar include/
 	$(TAR) -rvf code.tar src/ann_1.1.2/*
 	$(TAR) -rvf code.tar src/ANN_wrapper.cpp src/ANN_wrapper_second_level.cpp \
-		src/ANN_stats.c src/ANN_threads.c src/library_commons.c \
+		src/ANN_stats.cpp src/ANN_threads.c src/library_commons.c \
 		src/nn_stats_fixed_k_threads.c src/nn_stats_fixed_R_threads.c \
 		src/nn_stats.c
-	$(TAR) -rvf code.tar src/cython/setup.py src/cython/pyproject.toml src/cython/nn_stats/__init__.py \
-		src/cython/nn_stats/nn_stats.pyx src/nn_stats/nn_stats.pxd \
+	$(TAR) -rvf code.tar src/cython/setup.py src/cython/pyproject.toml \
+		src/cython/nn_stats/nn_statistics.pyx src/cython/nn_stats/nn_statistics.pxd \
 		src/cython/nn_stats/commons.pyx src/cython/nn_stats/commons.pxd
 	$(TAR) -rvf code.tar bin/python/*.py
 	$(TAR) -rvf code.tar lib
