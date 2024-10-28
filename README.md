@@ -1,5 +1,6 @@
 # nn_stats: nearest-neighbors statistics
 an efficient C/C++ library integrated with Python to estimate local averages (and their corresponding variance) usingnearest neighbors estimates.
+This library relies on the [ANN library](http://www.cs.umd.edu/~mount/ANN/) by David Mount and Sunil Arya.
 
 # compilation and installation
 - run ./configure and eventuallly solve the issues by installing missing programs and libraries (e.g.: "apt install libtool-bin" on Linux if asked to do so)
@@ -23,5 +24,5 @@ mean, var, = ns.compute_local_stats(pos, val, y, R=R)
 </code></pre>
 
 # notes
+this is still untder develpment...
 
-this library relies on the [ANN library](http://www.cs.umd.edu/~mount/ANN/) by David Mount and Sunil Arya
