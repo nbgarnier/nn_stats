@@ -59,11 +59,12 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
     if (nb_R>1) or (R[0]>0):
         if k[0]>0:        raise ValueError("specify either k or radius R, but not both!")
         if PNP.min(PNP.diff(R))<0:  raise ValueError("R should be sorted (with increasing values)")
-    if (k[0]==0) and (R[0]==0): raise ValueError("specify at least k or radius R!")
+    if (k[0]==0) and (R[0]==0):     raise ValueError("specify at least k or radius R!")
     
-    if (k[0]>0):   
+    if (k[0]>0):
+        if (k[nb_k-1]>=npts_in):    raise ValueError("imposed k is larger than the number of input points!")
         print("fixed k computation", end=" ")
-        dists = PNP.zeros((nb_k,npts_out), dtype=PNP.float64) # final version
+        dists  = PNP.zeros((nb_k,npts_out), dtype=PNP.float64) 
         A_mean = PNP.zeros((nb_k*nA,npts_out), dtype=PNP.float64)
         A_var  = PNP.zeros((nb_k*nA,npts_out), dtype=PNP.float64) 
         if (nb_k==1):
@@ -74,11 +75,15 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
             ratou  = nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &A_mean[0,0], &A_var[0,0], &dists[0,0])
         return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.sqrt(PNP.asarray(dists))
     if (nb_R>0):   
-        print("fixed R computation, using first R only (2024-10-29 WIP)")
-        nnn   = PNP.zeros((1,npts_out), dtype=PNP.intc) # tmp version
-        A_mean = PNP.zeros((nA,npts_out), dtype=PNP.float64)
-        A_var  = PNP.zeros((nA,npts_out), dtype=PNP.float64)     
-        ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &A_mean[0,0], &A_var[0,0], &nnn[0,0])
+        print("fixed R computation", end=" ")
+        nnn    = PNP.zeros((nb_R,npts_out), dtype=PNP.intc) 
+        A_mean = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
+        A_var  = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
+        if (nb_R==1):
+            print("1 value of R :", R[0]) 
+            ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &A_mean[0,0], &A_var[0,0], &nnn[0,0])
+        else:
+            print("multiple values of R :", PNP.array(R))
         return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(nnn)
 
 

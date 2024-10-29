@@ -89,6 +89,8 @@ void *threaded_stats_fixed_k_func(void *ptr)
 /* npts     is the number of points (nb of positions/locations)                         */
 /* nx       is the dimensionality of the positions/locations                            */
 /* nA       is the dimensionality of the observables (usually, nA=1, but may be larger) */
+/* y        contains all the "position"/"location where statistics will be computed     */
+/* npts_out is the number of points in y (nb of positions/locations)                    */
 /* k        is the number of neighbors to consider                                      */
 /* nb_cores is the nb of threads to use                                                 */
 /*          if ==-1, then it will be set to max nb of threads (auto-detect)             */
@@ -192,16 +194,17 @@ void *threaded_stats_multi_k_func(void *ptr)
 /* npts     is the number of points (nb of positions/locations)                         */
 /* nx       is the dimensionality of the positions/locations                            */
 /* nA       is the dimensionality of the observables (usually, nA=1, but may be larger) */
+/* y        contains all the "position"/"location where statistics will be computed     */
+/* npts_out is the number of points in y (nb of positions/locations)                    */
 /* k        contains all the numbers of neighbors to consider                           */
 /* nk       is the number of k to consider                                              */
-/* nb_cores is the nb of threads to use                                                 */
-/*          if ==-1, then it will be set to max nb of threads (auto-detect)             */
 /*                                                                                      */
 /* data is ordered like this :                                                          */
 /* x1(t=0)...x1(t=npts-1) x2(t=0) ... x2(t=npts-1) ... xnx(t=0) ... xnx(t=npts-1)       */
 /* A1(t=0)...A1(t=npts-1) A2(t=0) ... A2(t=npts-1) ... AnA(t=0) ... AnA(t=npts-1)       */
 /*                                                                                      */
 /* 2024-10-07  fork from "compute_entropy_ann_threads", no output yet                   */
+/* 2024-10-28  fork from "compute_stats_fixed_k_threads", tested OK                     */
 /****************************************************************************************/
 int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int *k, int nk, double *A_mean, double *A_std, double *dists)
 {	register int core, nb_cores=get_cores_number(GET_CORES_SELECTED), npts_eff_min;
