@@ -10,3 +10,4 @@ int compute_stats_fixed_k_threads(double *x, double *A, int npts, int nx, int nA
 
 int compute_stats_multi_k_threads(double *x, double *A, int npts, int nx, int nA, double *y, int npts_out, int *k, int nk, double *A_mean, double *A_std, double *dists);
 
+
