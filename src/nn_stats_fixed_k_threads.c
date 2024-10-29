@@ -154,6 +154,42 @@ int compute_stats_fixed_k_threads(double *x, double *A, int npts_in, int nx, int
 
 
 /****************************************************************************************/
+/* function to be used by "compute_stats_multi_k_threads"                               */
+/*                                                                                      */
+/* 2021-11-26  first multi-threads version                                              */
+/****************************************************************************************/
+void *threaded_stats_multi_k_func(void *ptr)
+{   struct thread_args  *args = (struct thread_args *)ptr; // cast arguments to the usable struct
+    struct thread_output *out = calloc(sizeof(struct thread_output),1); // allocate heap memory for this thread's results
+    register int i,d;
+    int core     = args->core,
+        i_start  = args->i_start,
+        i_end    = args->i_end,
+        nx       = args->nx,
+        nA       = args->nA,
+ //       k        = args->k,
+        n_eff    = i_end-i_start; // how many points in this thread
+    double rad   = 0;
+
+    double queryPt[nx]; // to be optimized
+
+    for (i=i_start; i<i_end; i++)
+    {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
+        rad = ANN_compute_stats_multi_k(queryPt, obs_in.A, k, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, obs_mean.dim, core);
+//        printf("%1.0f %1.0f -> %1.2f\n", pos_out.A[i], pos_out.A[i+pos_out.Npts], rad);
+    }
+    
+    out->n_eff    = n_eff;
+//    out->n_errors = l_errors;
+        
+//    printf("\t\t%d-%d=%d\n", i_start, i_end, i_end-i_start);
+//        free(args);
+    pthread_exit(out);
+}
+
+
+
+/****************************************************************************************/
 /* computes some local statistics, using nearest neighbors                              */
 /* same as above function, but for multiple values of k                                 */
 /*                                                                                      */

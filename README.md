@@ -8,7 +8,7 @@ This library relies on the [ANN library](http://www.cs.umd.edu/~mount/ANN/) by D
   
 # how to use in Python
 - "make python" will both compile the library and install it in your python path, which depends on you current environment. You should select your environment first, then run "./configure" and "make python", in order to have the library and its functions available in your favored environment.
-- there are examples in the bin/python subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
+- there are (or will be) examples in the bin/python subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
 <pre><code>
 import numpy as np
 import nn_stats as ns
@@ -28,5 +28,5 @@ mean, var, = ns.compute_local_stats(pos, val, y, R=R)   # imposed R
 </code></pre>
 
 # notes
-this is still untder develpment...
+this is still under develpment...
 

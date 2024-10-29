@@ -96,14 +96,15 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
 /* beware memory usage!!!                                                               */
 /*                                                                                      */
 /* 2024-10-17 - initial fork                                                            */
+/* 2024-10-29 - full rewritting, for optimization                                       */
 /****************************************************************************************/
 double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R, double *mean, double *var, int npts_out, int nA, int core)
 {   int i, d, ind, N, N_old;
     int npts=kdTree->nPoints();
-    double tmp; //, m[nA], v[nA];     // 2024-10-17: note: make these pointer nA, to optimize computations
-    int ind_k, k_max=k[Nk-1];   // k must be sorted, we take the largest
+    double tmp; 
+    int ind_k, k_max=k[Nk-1];                   // k must be sorted, we take the largest
 
-    std::vector<double> m, v;       // 2024/10/28: C++ allocation 
+    std::vector<double> m, v;                   // 2024/10/28: to optimize computations, C++ allocation 
     m.resize(nA); v.resize(nA);
 
     kdTree->annkSearch(x,                       // query point
@@ -112,9 +113,24 @@ double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R
                        dists[core],             // distance (returned)
                        ANN_eps);
 
+    N_old=0;
+    m[d]=0.; v[d]=0.;
     for (ind_k=0; ind_k<Nk; ind_k++)
     {   N=k[ind_k]-1+ANN_ALLOW_SELF_MATCH;
-        R[ind_k] = (double)dists[core][N-1];
+        R[npts_out*ind_k] = (double)dists[core][N-1];
+
+        for (d=0; d<nA; d++)
+        {   for (i=N_old; i<N; i++) 
+            {   tmp = (A+npts*d)[nnIdx[core][i]]; 
+                m[d]  += tmp;  v[d] += tmp*tmp;
+            }
+
+            mean[npts_out*(k+d)] = m[d]/N;
+            var [npts_out*(k+d)] = (v[d]-m[d]*m[d]/N)/(N-1);  // unbiased estimator
+
+        }
+
+        N_old=N;
     }
     for (d=0; d<nA; d++)
     {   m[d]=0.; v[d]=0.;
