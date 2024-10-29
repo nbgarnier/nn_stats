@@ -1,5 +1,5 @@
 # nn_stats: nearest-neighbors statistics
-an efficient C/C++ library integrated with Python to estimate local averages (and their corresponding variance) usingnearest neighbors estimates.
+an efficient C/C++ library integrated with Python to estimate local averages (and their corresponding variance) using nearest neighbors estimates.
 This library relies on the [ANN library](http://www.cs.umd.edu/~mount/ANN/) by David Mount and Sunil Arya.
 
 # compilation and installation
@@ -20,7 +20,11 @@ values    = np.random.randn(1,Npts)
 Npts_new  = 100
 loc_new   = np.random.randn(2, Npts_new)
 
-mean, var, = ns.compute_local_stats(pos, val, y, R=R)
+k=5
+R=0.5
+
+mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # imposed k
+mean, var, = ns.compute_local_stats(pos, val, y, R=R)   # imposed R
 </code></pre>
 
 # notes
