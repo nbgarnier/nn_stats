@@ -23,8 +23,8 @@ loc_new   = np.random.randn(2, Npts_new)
 k=np.array([5])
 R=np.array([0.5])
 
-mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # imposed k
-mean, var, = ns.compute_local_stats(pos, val, y, R=R)   # imposed R
+mean, var, = ns.compute_local_stats(locations, values, loc_new, k=k)   # imposed k
+mean, var, = ns.compute_local_stats(locations, values, loc_new, R=R)   # imposed R
 </code></pre>
 
 # important remarks
@@ -34,10 +34,10 @@ As the library is built for maximum efficiency (in both speed and memory usage),
 - all parameters for the function "compute_local_stats" are expected to be Numpy arrays. If you have a list, convert it first to a nd-array:
 <pre><code>
 k = [5, 10, 15]         # a Python list, not efficient and will throw an exception
-mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # throws an exception
+mean, var, = ns.compute_local_stats(locations, values, loc_new, k=k)   # throws an exception
 
 k = np.array([5, 10, 15])     # a nd-array, as expected
-mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # works OK
+mean, var, = ns.compute_local_stats(locations, values, loc_new, k=k)   # works OK
 </code></pre>
 
 - parameters k and R are expected to be sorted, i.e., their values are increasing with the index: 
@@ -48,6 +48,16 @@ k[i-1] <= k[i] # True for any valid index 1 <= i < size(k)
 - parameters "positions" and "observables" are *2d-arrays*, with their .shape[0] being respectively the space dimension (i.e., the number of coordinates) in "positions" and the nb of observables. 
 Their .shape[1] is simply the number of availabe points, which should be the same for "positions" and "observables".
 
+# other remarks
+
+ if you are just interested in the number of neighbors (given a fixed radius R) or the radius where the k-th neighbors lies, you can invoke the function "compute_local_stats" without providing any observable. This is for example done with:
+<pre><code>
+values    = np.random.randn(0, locations.shape[1])        # empty 2d-array of observables
+ 
+mean, var, R = ns.compute_local_stats(locations, values, loc_new, k=k)   # imposed k -> returns R at new locations loc_new
+mean, var, k = ns.compute_local_stats(locations, values, loc_new, R=R)   # imposed R -> returns k at new locations loc_new
+</code></pre>
+
 # notes
-this is still under develpment...
+this is still under development...
 

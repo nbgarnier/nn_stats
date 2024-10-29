@@ -119,7 +119,7 @@ double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R
 
     for (ind_k=0; ind_k<Nk; ind_k++)
     {   N=k[ind_k]-1+ANN_ALLOW_SELF_MATCH;
-        R[npts_out*ind_k] = (double)dists[core][N-1];
+        if (R!=NULL) R[npts_out*ind_k] = (double)dists[core][N-1];
 
         for (d=0; d<nA; d++)
         {   for (i=N_old; i<N; i++) 
