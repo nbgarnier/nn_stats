@@ -42,8 +42,8 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
     
     cdef CNP.ndarray[dtype=double, ndim=2, mode='c'] dists  #= void;
     cdef CNP.ndarray[dtype=int,    ndim=2, mode='c'] nnn
-    cdef CNP.ndarray[dtype=double, ndim=2, mode='c'] A_mean = PNP.zeros((nA,npts_out), dtype=PNP.float64) 
-    cdef CNP.ndarray[dtype=double, ndim=2, mode='c'] A_var  = PNP.zeros((nA,npts_out), dtype=PNP.float64) 
+    cdef CNP.ndarray[dtype=double, ndim=2, mode='c'] A_mean 
+    cdef CNP.ndarray[dtype=double, ndim=2, mode='c'] A_var 
      
     if (npts_in<nx):      raise ValueError("please transpose x")
     if (npts_A<nA):       raise ValueError("please transpose A")
@@ -58,17 +58,20 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
     if (k[0]>0):   
         print("fixed k computation", end=" ")
         dists = PNP.zeros((nb_k,npts_out), dtype=PNP.float64) # final version
+        A_mean = PNP.zeros((nb_k*nA,npts_out), dtype=PNP.float64)
+        A_var  = PNP.zeros((nb_k*nA,npts_out), dtype=PNP.float64) 
         if (nb_k==1):
             print("1 value of k :", k[0])
-            ratou = nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &A_mean[0,0], &A_var[0,0], &dists[0,0])
-            return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(dists)
+            ratou  = nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &A_mean[0,0], &A_var[0,0], &dists[0,0])
         else:
             print("multiple values of k :", PNP.array(k))
-            ratou = nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &A_mean[0,0], &A_var[0,0], &dists[0,0])
-            return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(dists).reshape((nb_k,npts_out))
+            ratou  = nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &A_mean[0,0], &A_var[0,0], &dists[0,0])
+        return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(dists)
     if (nb_R>0):   
         print("fixed R computation, using first R only (2024-10-29 WIP)")
         nnn   = PNP.zeros((1,npts_out), dtype=PNP.intc) # tmp version
+        A_mean = PNP.zeros((nA,npts_out), dtype=PNP.float64)
+        A_var  = PNP.zeros((nA,npts_out), dtype=PNP.float64)     
         ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &A_mean[0,0], &A_var[0,0], &nnn[0,0])
         return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(nnn)
 
