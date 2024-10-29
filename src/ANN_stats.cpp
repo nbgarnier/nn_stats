@@ -99,7 +99,7 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
 /* 2024-10-29 - full rewritting, for optimization                                       */
 /****************************************************************************************/
 double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R, double *mean, double *var, int npts_out, int nA, int core)
-{   int i, d, ind, N, N_old;
+{   int i, d, N, N_old;
     int npts=kdTree->nPoints();
     double tmp; 
     int ind_k, k_max=k[Nk-1];                   // k must be sorted, we take the largest
@@ -114,7 +114,10 @@ double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R
                        ANN_eps);
 
     N_old=0;
-    m[d]=0.; v[d]=0.;
+    for (d=0; d<nA; d++)
+    {   m[d]=0.; v[d]=0.;
+    }
+    
     for (ind_k=0; ind_k<Nk; ind_k++)
     {   N=k[ind_k]-1+ANN_ALLOW_SELF_MATCH;
         R[npts_out*ind_k] = (double)dists[core][N-1];
@@ -125,38 +128,14 @@ double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R
                 m[d]  += tmp;  v[d] += tmp*tmp;
             }
 
-            mean[npts_out*(k+d)] = m[d]/N;
-            var [npts_out*(k+d)] = (v[d]-m[d]*m[d]/N)/(N-1);  // unbiased estimator
+            mean[npts_out*(ind_k+d*Nk)] = m[d]/N;
+            var [npts_out*(ind_k+d*Nk)] = (v[d]-m[d]*m[d]/N)/(N-1);  // unbiased estimator
 
         }
 
         N_old=N;
     }
-    for (d=0; d<nA; d++)
-    {   m[d]=0.; v[d]=0.;
-
-        ind_k=0;
-        N_old=k[ind_k]-1+ANN_ALLOW_SELF_MATCH;
-        for (i=0; i<N_old; i++) 
-        {   tmp = (A+npts*d)[nnIdx[core][i]]; 
-            m[d]  += tmp;  v[d] += tmp*tmp;
-        }
-        mean[npts_out*d] = m[d]/N;
-        var [npts_out*d] = (v[d]-m[d]*m[d]/N)/(N-1);  // unbiased estimator
-
-        for (ind_k=1; ind_k<Nk; ind_k++)
-        {   N=k[ind_k]-1+ANN_ALLOW_SELF_MATCH;
-
-            for (i=N_old; i<N; i++)
-            {   tmp = (A+npts*d)[nnIdx[core][i]]; 
-                m  += tmp;  v += tmp*tmp;
-            }
-            mean[npts_out*d] = m/N;
-            var [npts_out*d] = (v-m*m/N)/(N-1); // unbiased estimator
-
-            N_old=N;
-        }
-    }    
+    
 //    printf("k=%d, N=%d, allow=%d   ", k, N, ANN_ALLOW_SELF_MATCH);
 //    return(0);
 

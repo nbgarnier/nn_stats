@@ -40,9 +40,10 @@ struct thread_output
 // dangerous: global variables:
 array pos_out;      // for the locations (examination locations)
 array obs_in;       // for the observables at the initial locations
+arr_int k_in;       // for the nb of nn (input)
 array rad_out;      // for the radius of the k-nn (output)
 array obs_mean;     // for the local average, on the outpout locations (output)
-array obs_var;      // for the lcoal variance, on the outpout locations (output)
+array obs_var;      // for the local variance, on the outpout locations (output)
 
 /****************************************************************************************/
 /* function to be used by "compute_stats_fixed_k_threads"                               */
@@ -60,13 +61,13 @@ void *threaded_stats_fixed_k_func(void *ptr)
         nA       = args->nA,
         k        = args->k,
         n_eff    = i_end-i_start; // how many points in this thread
-    double rad   = 0;
+//    double rad   = 0;
 
     double queryPt[nx]; // to be optimized
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
-        rad = ANN_compute_stats_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, obs_mean.dim, core);
+        ANN_compute_stats_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, obs_mean.dim, core);
 //        printf("%1.0f %1.0f -> %1.2f\n", pos_out.A[i], pos_out.A[i+pos_out.Npts], rad);
     }
     
@@ -169,13 +170,13 @@ void *threaded_stats_multi_k_func(void *ptr)
         nA       = args->nA,
  //       k        = args->k,
         n_eff    = i_end-i_start; // how many points in this thread
-    double rad   = 0;
+//    double rad   = 0;
 
     double queryPt[nx]; // to be optimized
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
-        rad = ANN_compute_stats_multi_k(queryPt, obs_in.A, k, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, obs_mean.dim, core);
+        ANN_compute_stats_multi_k(queryPt, obs_in.A, k_in.A, k_in.dim, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, obs_mean.dim, core);
 //        printf("%1.0f %1.0f -> %1.2f\n", pos_out.A[i], pos_out.A[i+pos_out.Npts], rad);
     }
     
@@ -185,7 +186,7 @@ void *threaded_stats_multi_k_func(void *ptr)
 //    printf("\t\t%d-%d=%d\n", i_start, i_end, i_end-i_start);
 //        free(args);
     pthread_exit(out);
-}
+} /* en of "threaded_stats_multi_k_func" function */
 
 
 
@@ -212,6 +213,7 @@ void *threaded_stats_multi_k_func(void *ptr)
 int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int *k, int nk, double *A_mean, double *A_std, double *dists)
 {	register int core, nb_cores=get_cores_number(GET_CORES_SELECTED), npts_eff_min;
 	int n_total=0; // just for sanity check
+    int k_max=k[nk-1];
 	int ret;
     
     if (nb_cores<1) set_cores_number(nb_cores); // auto-detect, if asked for
@@ -219,7 +221,7 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
     // 2022-12-13: all other threads number manipulation should be done outside of this engine function!
     npts_eff_min   = (npts_out - (npts_out%nb_cores))/nb_cores;  // nb pts mini dans chaque thread
 
-	init_ANN(npts_in, nx, k, nb_cores); 	
+	init_ANN(npts_in, nx, k_max, nb_cores); 	
     create_kd_tree(x, npts_in, nx);
     
     pthread_t    thread[nb_cores];
@@ -229,7 +231,8 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
     // dangerous: we use global variables:
     pos_out.Npts =npts_out; pos_out.dim =nx;    pos_out.A =y;
     obs_in.Npts  =npts_in;  obs_in.dim  =nA;    obs_in.A  =A;
-    rad_out.Npts =npts_out; rad_out.dim =k;     rad_out.A =dists;       // note 2024-10-15: only one k (largest) is returned
+    k_in.Npts    =1;        k_in.dim    =nk;    k_in.A    =k;
+    rad_out.Npts =npts_out; rad_out.dim =nk;    rad_out.A =dists;       // note 2024-10-29: all reequested k are returned
     obs_mean.Npts=npts_out; obs_mean.dim=nA;    obs_mean.A=A_mean;
     obs_var.Npts =npts_out; obs_var.dim =nA;    obs_var.A =A_std;
     
@@ -240,7 +243,7 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
         if (core==(nb_cores-1)) my_arguments[core].i_end = npts_out;    // last thread will work longer!
         my_arguments[core].nx = nx;
         my_arguments[core].nA = nA;
-        my_arguments[core].k = k;
+//       my_arguments[core].k = k;
         ret=pthread_create(&thread[core], NULL, threaded_stats_fixed_k_func, (void *)&my_arguments[core]);
         if (ret!=0)
         {   printf("[compute_stats_multi_k_threads] TROUBLE! couldn't create thread!\n");

@@ -17,8 +17,8 @@ include "commons.pyx"   # for basic library manipulation
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y, 
-                            int[::1] k=PNP.zeros(shape=(1),dtype=int)=PNP.zeros(shape=(1),dtype=int), 
-                            double[::1] R=PNP.zeros(shape=(1),dtype=double)=PNP.zeros(shape=(1),dtype=double)):
+                            int[::1] k=PNP.zeros(shape=(1),dtype=PNP.intc), 
+                            double[::1] R=PNP.zeros(shape=(1),dtype=PNP.float64)):
     """     
     compute local averages (and corresponding stds) of observables A (possibly multi-dimensional)
     given at locations x (usually 2-dimensional).
@@ -50,19 +50,26 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
     if (npts_out<ny):     raise ValueError("please transpose y")
     if (npts_A!=npts_in): raise ValueError("A and x do not have the same nb of points!")
     if (ny!=nx):          raise ValueError("y and x do not have the same dimensionality!")
-    if (nb_k>1) and (nb_R>1):   raise ValueError("specify either k or radius R, but not both!")
+    if (nb_k>1):
+        if (nb_R>1):      raise ValueError("specify either k or radius R, but not both!")
+        if R[0]>0:        raise ValueError("specify either k or radius R, but not both!")
     if (k[0]==0) and (R[0]==0): raise ValueError("specify at least k or radius R!")
     
-    if (nb_k>1):   
-#                print("fixed k computation")
-#                dists = PNP.zeros((k,npts_out), dtype=PNP.float64) # final version
-        dists = PNP.zeros((1,npts_out), dtype=PNP.float64) # tmp version
-#        ratou = nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k, &A_mean[0,0], &A_var[0,0], &dists[0,0])
-        ratou = nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &A_mean[0,0], &A_var[0,0], &dists[0,0])
-        return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(dists)
+    if (k[0]>0):   
+        print("fixed k computation", end=" ")
+        dists = PNP.zeros((nb_k,npts_out), dtype=PNP.float64) # final version
+        if (nb_k==1):
+            print("1 value of k :", k[0])
+            ratou = nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &A_mean[0,0], &A_var[0,0], &dists[0,0])
+            return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(dists)
+        else:
+            print("multiple values of k :", PNP.array(k))
+            ratou = nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &A_mean[0,0], &A_var[0,0], &dists[0,0])
+            return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(dists).reshape((nb_k,npts_out))
     if (nb_R>0):   
+        print("fixed R computation, using first R only (2024-10-29 WIP)")
         nnn   = PNP.zeros((1,npts_out), dtype=PNP.intc) # tmp version
-        ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R, &A_mean[0,0], &A_var[0,0], &nnn[0,0])
+        ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &A_mean[0,0], &A_var[0,0], &nnn[0,0])
         return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(nnn)
 
 

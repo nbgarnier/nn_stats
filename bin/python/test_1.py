@@ -76,31 +76,38 @@ y = np.array((np.outer(a,b).flatten(),np.outer(b,a).flatten()), dtype=float)
 print("output positions :", y.shape)
 #print(y)
 
-print("\nfixed k =", k, end=" ")
-[A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=k)
-print("output values of size", A_mean.shape, A_var.shape, "and", dists.shape)
-#print(A_mean)
-#print(dists)
-
-#ns.multithreading(1)
-
-# plot
-Fig = plt.figure(figsize=(15,5))
-P1  = Fig.add_subplot(1,3,1); P1.set_title("initial locations")
-P2  = Fig.add_subplot(1,3,2); P2.set_title("fixed k=%d" %k)
-P3  = Fig.add_subplot(1,3,3); P3.set_title("fixed R=%1.1f" %R)
+# prepare plot
+Fig = plt.figure(figsize=(15,10))
+P1  = Fig.add_subplot(2,3,1); P1.set_title("initial locations")
+P2  = Fig.add_subplot(2,3,2); P2.set_title("fixed k=%d" %k)
+P3  = Fig.add_subplot(2,3,3); P3.set_title("fixed k=%d" %(2*k))
+P4  = Fig.add_subplot(2,3,4); P4.set_title("fixed R=%1.1f" %R)
+P5  = Fig.add_subplot(2,3,5); P4.set_title("fixed k=%d" %k)
+P6  = Fig.add_subplot(2,3,6); P6.set_title("fixed k=%d" %(2*k))
 
 P1.scatter(pos[0], pos[1], marker='.', edgecolor='b', facecolor='none', alpha=0.5 )
-#P2.contour(y[0], y[1], A_mean.reshape((Nx_out, Nx_out-1)))
-#P2.contour(A_mean.reshape((Nx_out, Nx_out-1)))
-#P2.imshow(A_mean.reshape((Nx_out+1, Nx_out)))
+
+print("\nfixed k =", k, end=" ")
+[A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=np.array([k], dtype=np.intc))
 P2.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists, marker='o')
+print(dists)
+print("\nfixed k =", k, end=" ")
+[A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=np.array([2*k], dtype=np.intc))
+P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists, marker='o')
+print(dists)
+
+[A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=np.array([k, 2*k], dtype=np.intc))
+P4.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists[0], marker='o')
+P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists[1], marker='o')
+print("output values of size", A_mean.shape, A_var.shape, "and", dists.shape)
+#print(A_mean)
+print(dists)
 
 
 print("\nfixed R =", R, end=" ")
-A_mean, A_var, nnn = ns.compute_local_stats(pos, val, y, R=R)
+A_mean, A_var, nnn = ns.compute_local_stats(pos, val, y, R=np.array([R]))
 print("output values of size", A_mean.shape, A_var.shape, "and", nnn.shape)
 
-P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean*nnn, marker='o')
+P4.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean*nnn, marker='o')
 print(nnn)
 Fig.savefig("essai.pdf")
