@@ -46,7 +46,7 @@ array   obs_mean;     // for the local average, on the outpout locations (output
 array   obs_var;      // for the lcoal variance, on the outpout locations (output)
 
 /****************************************************************************************/
-/* function to be used by "compute_knn_stats_threads"                                   */
+/* function to be used by "compute_stats_fixed_R_threads"                               */
 /*                                                                                      */
 /* 2021-11-26  first multi-threads version                                              */
 /****************************************************************************************/
@@ -62,7 +62,6 @@ void *threaded_stats_fixed_R_func(void *ptr)
     double R     = args->R;
     int n_eff    = i_end-i_start, // how many points in this thread
         l_errors = 0;
-    double rad   = 0.;
     double ratou[2];
 
     double queryPt[nx]; // to be optimized
@@ -77,7 +76,7 @@ void *threaded_stats_fixed_R_func(void *ptr)
                 (obs_var.A +i)[obs_mean.Npts*d] = my_NAN;
             }
         }
-        else rad = ANN_compute_stats_single_k(queryPt, obs_in.A, k, ratou, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
+        else ANN_compute_stats_single_k(queryPt, obs_in.A, k, ratou, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
         
         nnn_out.A[i] = k;
     }
@@ -171,6 +170,67 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
 
 
 
+/****************************************************************************************/
+/* function to be used by "compute_stats_multi_R_threads"                               */
+/*                                                                                      */
+/* 2021-11-26  first multi-threads version                                              */
+/****************************************************************************************/
+void *threaded_stats_multi_R_func(void *ptr)
+{   struct thread_args  *args = (struct thread_args *)ptr; // cast arguments to the usable struct
+    struct thread_output *out = calloc(sizeof(struct thread_output),1); // allocate heap memory for this thread's results
+    register int i,j,d;
+    int *local_k, ind_k_min, ind_k_max;
+    int core     = args->core,
+        i_start  = args->i_start,
+        i_end    = args->i_end,
+        nx       = args->nx,
+        nA       = args->nA;
+    int n_eff    = i_end-i_start, // how many points in this thread
+        l_errors = 0;
+    double ratou[2];
+
+    double queryPt[nx]; // to be optimized
+    local_k = calloc(R_in.dim, sizeof(int));
+
+    for (i=i_start; i<i_end; i++)
+    {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
+        for (j=0; j<R_in.dim; j++)
+        {   local_k[j] = ANN_count_nearest_neighbors(queryPt, R_in.A[j], core);
+            nnn_out.A[j]= local_k[j];
+        }
+        // search for the range of valid k values and keep their index:
+        ind_k_min=0;
+        while ((local_k[ind_k_min]<1) && (ind_k_min<R_in.dim-1)) ind_k_min++;
+        ind_k_max=ind_k_min;
+        while ((local_k[ind_k_max]<tree_k_max) && (ind_k_max<=R_in.dim-1)) ind_k_max++;
+
+        for (j=0; j<ind_k_min; j++)                             // 2024/10/29 unfinished inside the loop
+        {   for (d=0; d<nA; d++)
+            {   (obs_mean.A+i)[obs_mean.Npts*d] = my_NAN;
+                (obs_var.A +i)[obs_mean.Npts*d] = my_NAN;
+            }
+        }
+        for (j=ind_k_max; j<R_in.dim; j++)                      // 2024/10/29 unfinished inside the loop
+        {   for (d=0; d<nA; d++)
+            {   (obs_mean.A+i)[obs_mean.Npts*d] = my_NAN;
+                (obs_var.A +i)[obs_mean.Npts*d] = my_NAN;
+            }
+        }
+
+        // work in the range of valid k:
+        ANN_compute_stats_multi_k(queryPt, obs_in.A, local_k+ind_k_min, ind_k_max-ind_k_min, NULL, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
+        
+    }
+    
+    out->n_eff    = n_eff;
+    out->n_errors = l_errors;
+        
+//    printf("\t\t%d-%d=%d\n", i_start, i_end, i_end-i_start);
+//        free(args);
+    free(local_k);
+    pthread_exit(out);
+}
+
 
 /****************************************************************************************/
 /* computes some local statistics, using nearest neighbors                              */
@@ -215,7 +275,8 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
     // dangerous: we use global variables:
     pos_out.Npts =npts_out; pos_out.dim =nx;    pos_out.A =y;
     obs_in.Npts  =npts_in;  obs_in.dim  =nA;    obs_in.A  =A;
-    nnn_out.Npts =npts_out; nnn_out.dim =1;     nnn_out.A =k;       // note 2024-10-15: only one nb (largest R) is returned
+    R_in.Npts    =1;        R_in.dim    =nR;    R_in.A    =R;
+    nnn_out.Npts =npts_out; nnn_out.dim =nR;    nnn_out.A =k;       // note 2024-10-15: only one nb (largest R) is returned
     obs_mean.Npts=npts_out; obs_mean.dim=nA;    obs_mean.A=A_mean;
     obs_var.Npts =npts_out; obs_var.dim =nA;    obs_var.A =A_std;
     
@@ -227,10 +288,10 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
         if (core==(nb_cores-1)) my_arguments[core].i_end = npts_out;  // last thread will work longer!
         my_arguments[core].nx = nx;
         my_arguments[core].nA = nA;
-        my_arguments[core].R  = R;
+//        my_arguments[core].R  = R;
         ret=pthread_create(&thread[core], NULL, threaded_stats_fixed_R_func, (void *)&my_arguments[core]);
         if (ret!=0)
-        {   printf("[compute_stats_fixed_R_threads] TROUBLE! couldn't create thread!\n");
+        {   printf("[compute_stats_multi_R_threads] TROUBLE! couldn't create thread!\n");
             return(-1); 
         }
     }
@@ -242,7 +303,7 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
     }
     
     // sanity check:
-    if (n_total!=npts_out) printf("[compute_stats_fixed_R_threads] TROUBLE! npts altered!\n");
+    if (n_total!=npts_out) printf("[compute_stats_multi_R_threads] TROUBLE! npts altered!\n");
        
 	free_ANN(nb_cores);
     return(0);
