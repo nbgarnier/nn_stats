@@ -221,7 +221,7 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
     // 2022-12-13: all other threads number manipulation should be done outside of this engine function!
     npts_eff_min   = (npts_out - (npts_out%nb_cores))/nb_cores;  // nb pts mini dans chaque thread
 
-	init_ANN(npts_in, nx, k_max, nb_cores); 	
+	init_ANN(npts_in, nx, k_max, nb_cores); 	printf("k_max %d\n", k_max);
     create_kd_tree(x, npts_in, nx);
     
     pthread_t    thread[nb_cores];
@@ -244,7 +244,7 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
         my_arguments[core].nx = nx;
         my_arguments[core].nA = nA;
 //       my_arguments[core].k = k;
-        ret=pthread_create(&thread[core], NULL, threaded_stats_fixed_k_func, (void *)&my_arguments[core]);
+        ret=pthread_create(&thread[core], NULL, threaded_stats_multi_k_func, (void *)&my_arguments[core]);
         if (ret!=0)
         {   printf("[compute_stats_multi_k_threads] TROUBLE! couldn't create thread!\n");
             return(-1); 

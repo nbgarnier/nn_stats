@@ -27,6 +27,18 @@ mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # imposed k
 mean, var, = ns.compute_local_stats(pos, val, y, R=R)   # imposed R
 </code></pre>
 
+# important remarks
+
+As the library is built for maximum efficiency (in both speed and memory usage), you should respect the following:
+- all parameters for the function "compute_local_stats" are expected to be Numpy arrays. If you have a list, convert it first to a nd-array:
+<pre><code>
+k = [5, 10, 15]         # a Python list, not efficient and will throw an exception
+mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # throws an exception
+
+k = np.array([5, 10, 15])     # a nd-array, as expected
+mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # works OK
+</code></pre>
+
 # notes
 this is still under develpment...
 
