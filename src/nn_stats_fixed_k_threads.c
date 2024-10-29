@@ -31,9 +31,9 @@ struct thread_args
 
 struct thread_output
     {   int n_eff;
-        int n_errors;
-        double mean;
-        double var;
+//        int n_errors;
+//        double mean;
+//        double var;
     };
 
 
@@ -61,18 +61,16 @@ void *threaded_stats_fixed_k_func(void *ptr)
         nA       = args->nA,
         k        = args->k,
         n_eff    = i_end-i_start; // how many points in this thread
-//    double rad   = 0;
 
     double queryPt[nx]; // to be optimized
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
-        ANN_compute_stats_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, obs_mean.dim, core);
+        ANN_compute_stats_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, nA, core);
 //        printf("%1.0f %1.0f -> %1.2f\n", pos_out.A[i], pos_out.A[i+pos_out.Npts], rad);
     }
     
     out->n_eff    = n_eff;
-//    out->n_errors = l_errors;
         
 //    printf("\t\t%d-%d=%d\n", i_start, i_end, i_end-i_start);
 //        free(args);
@@ -168,23 +166,17 @@ void *threaded_stats_multi_k_func(void *ptr)
         i_end    = args->i_end,
         nx       = args->nx,
         nA       = args->nA,
- //       k        = args->k,
         n_eff    = i_end-i_start; // how many points in this thread
-//    double rad   = 0;
 
     double queryPt[nx]; // to be optimized
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
-        ANN_compute_stats_multi_k(queryPt, obs_in.A, k_in.A, k_in.dim, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, obs_mean.dim, core);
+        ANN_compute_stats_multi_k(queryPt, obs_in.A, k_in.A, k_in.dim, rad_out.A + i, obs_mean.A + i, obs_var.A + i, obs_mean.Npts, nA, core);
 //        printf("%1.0f %1.0f -> %1.2f\n", pos_out.A[i], pos_out.A[i+pos_out.Npts], rad);
     }
     
     out->n_eff    = n_eff;
-//    out->n_errors = l_errors;
-        
-//    printf("\t\t%d-%d=%d\n", i_start, i_end, i_end-i_start);
-//        free(args);
     pthread_exit(out);
 } /* en of "threaded_stats_multi_k_func" function */
 
@@ -221,7 +213,7 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
     // 2022-12-13: all other threads number manipulation should be done outside of this engine function!
     npts_eff_min   = (npts_out - (npts_out%nb_cores))/nb_cores;  // nb pts mini dans chaque thread
 
-	init_ANN(npts_in, nx, k_max, nb_cores); 	printf("k_max %d\n", k_max);
+	init_ANN(npts_in, nx, k_max, nb_cores);
     create_kd_tree(x, npts_in, nx);
     
     pthread_t    thread[nb_cores];
@@ -243,7 +235,6 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
         if (core==(nb_cores-1)) my_arguments[core].i_end = npts_out;    // last thread will work longer!
         my_arguments[core].nx = nx;
         my_arguments[core].nA = nA;
-//       my_arguments[core].k = k;
         ret=pthread_create(&thread[core], NULL, threaded_stats_multi_k_func, (void *)&my_arguments[core]);
         if (ret!=0)
         {   printf("[compute_stats_multi_k_threads] TROUBLE! couldn't create thread!\n");
