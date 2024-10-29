@@ -38,12 +38,12 @@ mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # throws an exception
 
 k = np.array([5, 10, 15])     # a nd-array, as expected
 mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # works OK
-<pre><code>
+</code></pre>
 
 - parameters k and R are expected to be sorted, i.e., their values are increasing with the index: 
 <pre><code>
 k[i-1] <= k[i] # True for any valid index 1 <= i < size(k) 
-<pre><code>
+</code></pre>
 k[i-1] <= k[i] # True for any valid index 1 <= i < size(k) 
 
 
