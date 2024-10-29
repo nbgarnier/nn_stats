@@ -5,6 +5,7 @@
  *  Copyright 2024 ENS-Lyon - CNRS. All rights reserved.
  *
  *
+ *  2024-10-29 - to-do: check if there is a speed improvment when using single_k for multi_k with nk=1
  */
  
 #include <stdlib.h>

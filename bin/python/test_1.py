@@ -8,7 +8,7 @@ np.random.seed(1234)
 rng = default_rng()
 
 pi = np.pi
-k=150
+k=50
 R=1.8
 
 import matplotlib
@@ -103,8 +103,8 @@ print(A_mean)
 # multiple values of k:
 print("\nfixed k =", [k, 2*k], end=" ")
 [A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=np.array([k, 2*k], dtype=np.intc))
-#P4.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists[0], marker='o')
-#P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists[1], marker='o')
+P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[0]/dists[0], marker='o')
+P6.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[1]/dists[1], marker='o')
 print("output values of size", A_mean.shape, A_var.shape, "and", dists.shape)
 print(dists)
 print(A_mean)

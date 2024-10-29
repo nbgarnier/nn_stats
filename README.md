@@ -44,8 +44,9 @@ mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # works OK
 <pre><code>
 k[i-1] <= k[i] # True for any valid index 1 <= i < size(k) 
 </code></pre>
-k[i-1] <= k[i] # True for any valid index 1 <= i < size(k) 
 
+- parameters "positions" and "observables" are *2d-array*, with their .shape[0] being respectively the space dimension (i.e., the number of coordinates) in "positions" and the nb of observables. 
+Their .shape[1] is then simly the number of availabe points, which should be the same for "positions" and "observables".
 
 # notes
 this is still under develpment...
