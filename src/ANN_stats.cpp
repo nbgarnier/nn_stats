@@ -13,7 +13,7 @@
 #include "ANN/ANN.h"
 #include "ANN_wrapper.h"        // definitions of functions only
 #include "ANN_stats.h"          // definitions of functions only
-#include <stdio.h>              // for printf, to be removed
+//#include <stdio.h>              // for printf, to be removed
 
 // #define UNUSED(expr) do { (void)(expr); } while (0)
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables
@@ -93,15 +93,18 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
 /****************************************************************************************/
 /* same as above, but for a set of prescribed values of numbers k                       */
 /*                                                                                      */
-/* beware momory usage!!!                                                               */
+/* beware memory usage!!!                                                               */
 /*                                                                                      */
 /* 2024-10-17 - initial fork                                                            */
 /****************************************************************************************/
 double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R, double *mean, double *var, int npts_out, int nA, int core)
 {   int i, d, ind, N, N_old;
     int npts=kdTree->nPoints();
-    double tmp, m[nA], v[nA];     // 2024-10-17: note: make these pointer nA, to optimize computations
+    double tmp; //, m[nA], v[nA];     // 2024-10-17: note: make these pointer nA, to optimize computations
     int ind_k, k_max=k[Nk-1];   // k must be sorted, we take the largest
+
+    std::vector<double> m, v;       // 2024/10/28: C++ allocation 
+    m.resize(nA); v.resize(nA);
 
     kdTree->annkSearch(x,                       // query point
                        k_max+ANN_ALLOW_SELF_MATCH,  // number of near neighbors (including or excluding central point)
@@ -120,10 +123,10 @@ double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R
         N_old=k[ind_k]-1+ANN_ALLOW_SELF_MATCH;
         for (i=0; i<N_old; i++) 
         {   tmp = (A+npts*d)[nnIdx[core][i]]; 
-            m  += tmp;  v += tmp*tmp;
+            m[d]  += tmp;  v[d] += tmp*tmp;
         }
-        mean[npts_out*d] = m/N;
-        var [npts_out*d] = (v-m*m/N)/(N-1);  // unbiased estimator
+        mean[npts_out*d] = m[d]/N;
+        var [npts_out*d] = (v[d]-m[d]*m[d]/N)/(N-1);  // unbiased estimator
 
         for (ind_k=1; ind_k<Nk; ind_k++)
         {   N=k[ind_k]-1+ANN_ALLOW_SELF_MATCH;

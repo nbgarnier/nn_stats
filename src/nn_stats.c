@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include "library_commons.h"        // for definitions of nb_errors, and stds
-#include "library_matlab.h"         // compilation for Matlab
+//#include "library_matlab.h"         // compilation for Matlab
 #include "ANN_wrapper.h"            // for ANN library functions (in C++)
 // #include "nns_count.h"              // NBG counting functions (2019-01-23)
 //#include "math_tools.h"
@@ -88,8 +88,8 @@ int compute_stats_fixed_k(double *x, double *A, int npts, int nx, int nA, int k,
     debug_trace("[compute_stats_fixed_k] signal x", x, npts, m, p, tau, k);
 #endif
 
-    nb_errors = compute_stats_fixed_k_threads(x, A, npts, nx, nA, k, A_mean, A_std, get_cores_number(GET_CORES_SELECTED));
+    j = compute_stats_fixed_k_threads(x, A, npts, nx, nA, k, A_mean, A_var, get_cores_number(GET_CORES_SELECTED));
 
-	return(nb_errors);
+	return(j);
 } /* end of function "compute_stats_fixed_k" **********************************************/
 
