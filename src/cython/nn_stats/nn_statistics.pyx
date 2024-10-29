@@ -23,10 +23,12 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
     compute local averages (and corresponding stds) of observables A (possibly multi-dimensional)
     given at locations x (usually 2-dimensional).
     
-    The averages are computed at new locations y.   
+    The averages are computed at new locations y, using either:
+    - the k-nn with prescribed k,
+    - all points in a ball of radius R, with prescribed R.
     
     :param x: initial locations/positions (NumPy array with ndim=2, all coordinates along 1st dimension)
-    :param A: embedding dimension :math:`m` (default=1)
+    :param A: observables (NumPy array with ndim=2)
     :param y: locations/positions (NumPy array with ndim=2, all coordinates along 1st dimension) where statistics will be computed.
     :param k: 1d-array (int) of number of neighbors to consider for a fixed-k computation.
     :param R: 1d-array of radii to consider for a fixed-radius computation.
