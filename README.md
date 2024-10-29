@@ -20,8 +20,8 @@ values    = np.random.randn(1,Npts)
 Npts_new  = 100
 loc_new   = np.random.randn(2, Npts_new)
 
-k=5
-R=0.5
+k=np.array([5])
+R=np.array([0.5])
 
 mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # imposed k
 mean, var, = ns.compute_local_stats(pos, val, y, R=R)   # imposed R
@@ -45,8 +45,8 @@ mean, var, = ns.compute_local_stats(pos, val, y, k=k)   # works OK
 k[i-1] <= k[i] # True for any valid index 1 <= i < size(k) 
 </code></pre>
 
-- parameters "positions" and "observables" are *2d-array*, with their .shape[0] being respectively the space dimension (i.e., the number of coordinates) in "positions" and the nb of observables. 
-Their .shape[1] is then simly the number of availabe points, which should be the same for "positions" and "observables".
+- parameters "positions" and "observables" are *2d-arrays*, with their .shape[0] being respectively the space dimension (i.e., the number of coordinates) in "positions" and the nb of observables. 
+Their .shape[1] is simply the number of availabe points, which should be the same for "positions" and "observables".
 
 # notes
 this is still under develpment...

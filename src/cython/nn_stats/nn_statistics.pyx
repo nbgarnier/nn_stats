@@ -72,7 +72,7 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
         else:
             print("multiple values of k :", PNP.array(k))
             ratou  = nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &A_mean[0,0], &A_var[0,0], &dists[0,0])
-        return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(dists)
+        return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.sqrt(PNP.asarray(dists))
     if (nb_R>0):   
         print("fixed R computation, using first R only (2024-10-29 WIP)")
         nnn   = PNP.zeros((1,npts_out), dtype=PNP.intc) # tmp version
