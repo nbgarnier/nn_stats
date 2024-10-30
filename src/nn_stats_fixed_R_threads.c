@@ -187,7 +187,6 @@ void *threaded_stats_multi_R_func(void *ptr)
         nA       = args->nA;
     int n_eff    = i_end-i_start, // how many points in this thread
         l_errors = 0;
-    double ratou[2];
 
     double queryPt[nx]; // to be optimized
     local_k = calloc(R_in.dim, sizeof(int));
@@ -204,16 +203,16 @@ void *threaded_stats_multi_R_func(void *ptr)
         ind_k_max=ind_k_min;
         while ((local_k[ind_k_max]<tree_k_max) && (ind_k_max<=R_in.dim-1)) ind_k_max++;
 
-        for (j=0; j<ind_k_min; j++)                             // 2024/10/29 unfinished inside the loop
+        for (j=0; j<ind_k_min; j++)                             // 2024/10/29 unchecked inside the loop
         {   for (d=0; d<nA; d++)
-            {   (obs_mean.A+i)[obs_mean.Npts*d] = my_NAN;
-                (obs_var.A +i)[obs_mean.Npts*d] = my_NAN;
+            {   (obs_mean.A+i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
+                (obs_var.A +i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
             }
         }
-        for (j=ind_k_max; j<R_in.dim; j++)                      // 2024/10/29 unfinished inside the loop
+        for (j=ind_k_max; j<R_in.dim; j++)                     
         {   for (d=0; d<nA; d++)
-            {   (obs_mean.A+i)[obs_mean.Npts*d] = my_NAN;
-                (obs_var.A +i)[obs_mean.Npts*d] = my_NAN;
+            {   (obs_mean.A+i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
+                (obs_var.A +i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
             }
         }
 

@@ -84,6 +84,7 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
             ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &A_mean[0,0], &A_var[0,0], &nnn[0,0])
         else:
             print("multiple values of R :", PNP.array(R))
+            ratou = nn_statistics.compute_stats_multi_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &R[0], nb_R, &A_mean[0,0], &A_var[0,0], &nnn[0,0])
         return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(nnn)
 
 
