@@ -52,14 +52,11 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
     if (npts_out<ny):     raise ValueError("please transpose y")
     if (npts_A!=npts_in): raise ValueError("A and x do not have the same nb of points!")
     if (ny!=nx):          raise ValueError("y and x do not have the same dimensionality!")
-    if (nb_k>1) or (k[0]>0):
-        if (nb_R>1):      raise ValueError("specify either k or radius R, but not both!")
-        if R[0]>0:        raise ValueError("specify either k or radius R, but not both!")
-        if PNP.min(PNP.diff(k))<0:  raise ValueError("k should be sorted (with increasing values)")
-    if (nb_R>1) or (R[0]>0):
-        if k[0]>0:        raise ValueError("specify either k or radius R, but not both!")
-        if PNP.min(PNP.diff(R))<0:  raise ValueError("R should be sorted (with increasing values)")
-    if (k[0]==0) and (R[0]==0):     raise ValueError("specify at least k or radius R!")
+    if ( (nb_k>1) or (k[0]>0) ) and ( (nb_R>1) or (R[0]>0) ):
+                          raise ValueError("specify either k or radius R, but not both!")
+    if (nb_k>1) and (PNP.min(PNP.diff(k))<0):   raise ValueError("k should be sorted (with increasing values)")
+    if (nb_R>1) and (PNP.min(PNP.diff(R))<0):   raise ValueError("R should be sorted (with increasing values)")
+    if (k[0]==0) and (R[0]==0):                 raise ValueError("specify at least k or radius R!")
     
     if (k[0]>0):
         if (k[nb_k-1]>=npts_in):    raise ValueError("imposed k is larger than the number of input points!")

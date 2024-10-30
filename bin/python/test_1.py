@@ -36,8 +36,8 @@ sigma_x = 1
 radius  = 5.   # for inital points and output grid
 
 # here, we can play with nb of cores:
-ns.multithreading(1)       # single core
-#ns.multithreading("auto")  # max cores
+#ns.multithreading(1)       # single core
+ns.multithreading("auto")  # max cores
 ns.multithreading("info")  # prints informations
 
 def Disk(radius, Npts=100):
