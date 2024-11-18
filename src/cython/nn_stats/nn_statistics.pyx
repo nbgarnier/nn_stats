@@ -28,7 +28,7 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
     - all points in a ball of radius R, with prescribed R.
     
     :param x: initial locations/positions (NumPy array with ndim=2, all coordinates along 1st dimension)
-    :param A: observables (NumPy array with ndim=2)
+    :param A: observables (NumPy array with ndim=2) 
     :param y: locations/positions (NumPy array with ndim=2, all coordinates along 1st dimension) where statistics will be computed.
     :param k: 1d-array (int) of number of neighbors to consider for a fixed-k computation.
     :param R: 1d-array of radii to consider for a fixed-radius computation.

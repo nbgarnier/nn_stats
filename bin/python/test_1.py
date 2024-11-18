@@ -29,7 +29,7 @@ matplotlib.rcParams['axes.formatter.use_mathtext'] = True
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # test with fixed k or fixed radius
 ###############################################################################
-Npts    = 50000
+Npts    = 5000
 ndim    = 1
 sigma_x = 1
 
@@ -100,7 +100,7 @@ print("output values of size", A_mean.shape, A_var.shape, "and", dists.shape)
 #print(A_mean)
 print("\telapsed time", time()-t1)
 
-exit()
+#exit()
 
 print("\nfixed R =", R, end=" ")
 A_mean, A_var, nnn = ns.compute_local_stats(pos, val, y, R=np.array([R]))
