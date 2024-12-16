@@ -168,7 +168,7 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
 } /* end of function "compute_stats_fixed_R_threads" *************************************/
 
 
-#define i_look 88 // for debug
+#define i_look 188 // for debug
 
 /****************************************************************************************/
 /* function to be used by "compute_stats_multi_R_threads"                               */
@@ -211,21 +211,24 @@ void *threaded_stats_multi_R_func(void *ptr)
 
         // search for the range of valid k values and keep their index:
         ind_k_min=0;
-        while ((local_k[ind_k_min]<1) && (ind_k_min<R_in.dim-1)) ind_k_min++;
+        while ((local_k[ind_k_min]<1) && (ind_k_min<R_in.dim)) ind_k_min++;
         ind_k_max=ind_k_min;
         while ((local_k[ind_k_max]<tree_k_max) && (ind_k_max<=R_in.dim-1)) ind_k_max++;
+//        if (local_k[ind_k_max]<tree_k_max) 
+        ind_k_max--;
         if ((i%i_look)==0) 
         {   printf("\t ind_k_min = %d => k_min = %d, \tind_k_max = %d => k_max = %d\n", ind_k_min, local_k[ind_k_min], ind_k_max, local_k[ind_k_max]);
 
         }
 
-        for (j=0; j<ind_k_min; j++)                             // 2024/10/29 unchecked inside the loop
+        int my_min = (ind_k_min<R_in.dim) ? ind_k_min : R_in.dim;
+        for (j=0; j<my_min; j++)                             // 2024/10/29 unchecked inside the loop
         {   for (d=0; d<nA; d++)
             {   (obs_mean.A+i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
                 (obs_var.A +i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
             }
         }
-        for (j=ind_k_max; j<R_in.dim; j++)                     
+        for (j=ind_k_max+1; j<R_in.dim; j++)                     
         {   for (d=0; d<nA; d++)
             {   (obs_mean.A+i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
                 (obs_var.A +i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
@@ -233,7 +236,8 @@ void *threaded_stats_multi_R_func(void *ptr)
         }
 
         // work in the range of valid k:
-        ANN_compute_stats_multi_k(queryPt, obs_in.A, local_k+ind_k_min, ind_k_max-ind_k_min, NULL, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
+        if ( (ind_k_min<R_in.dim) && (ind_k_min<ind_k_max) )
+            ANN_compute_stats_multi_k(queryPt, obs_in.A, local_k+ind_k_min, ind_k_max-ind_k_min+1, NULL, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
         
     }
     
