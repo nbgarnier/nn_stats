@@ -168,7 +168,7 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
 } /* end of function "compute_stats_fixed_R_threads" *************************************/
 
 
-
+#define i_look 88 // for debug
 
 /****************************************************************************************/
 /* function to be used by "compute_stats_multi_R_threads"                               */
@@ -193,15 +193,31 @@ void *threaded_stats_multi_R_func(void *ptr)
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
+        if ((i%i_look)==0)
+        {   printf("point %d ( ", i); 
+            for (d=0; d<nx; d++) printf("%1.2f ,", queryPt[d]);
+            printf(")\t");
+        }
+
         for (j=0; j<R_in.dim; j++)
         {   local_k[j] = ANN_count_nearest_neighbors(queryPt, R_in.A[j], core);
             nnn_out.A[j]= local_k[j];
+            if ((i%i_look)==0)
+            {   printf("  R=%1.2f -> k=%d", R_in.A[j], local_k[j]);
+            }
+
         }
+        if ((i%i_look)==0) printf("\n");
+
         // search for the range of valid k values and keep their index:
         ind_k_min=0;
         while ((local_k[ind_k_min]<1) && (ind_k_min<R_in.dim-1)) ind_k_min++;
         ind_k_max=ind_k_min;
         while ((local_k[ind_k_max]<tree_k_max) && (ind_k_max<=R_in.dim-1)) ind_k_max++;
+        if ((i%i_look)==0) 
+        {   printf("\t ind_k_min = %d => k_min = %d, \tind_k_max = %d => k_max = %d\n", ind_k_min, local_k[ind_k_min], ind_k_max, local_k[ind_k_max]);
+
+        }
 
         for (j=0; j<ind_k_min; j++)                             // 2024/10/29 unchecked inside the loop
         {   for (d=0; d<nA; d++)
@@ -275,7 +291,7 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
     pos_out.Npts =npts_out; pos_out.dim =nx;    pos_out.A =y;
     obs_in.Npts  =npts_in;  obs_in.dim  =nA;    obs_in.A  =A;
     R_in.Npts    =1;        R_in.dim    =nR;    R_in.A    =R;
-    nnn_out.Npts =npts_out; nnn_out.dim =nR;    nnn_out.A =k;       // note 2024-10-15: only one nb (largest R) is returned
+    nnn_out.Npts =npts_out; nnn_out.dim =nR;    nnn_out.A =k;       // note 2024-12-16: all R results are returned
     obs_mean.Npts=npts_out; obs_mean.dim=nA;    obs_mean.A=A_mean;
     obs_var.Npts =npts_out; obs_var.dim =nA;    obs_var.A =A_std;
     
@@ -288,7 +304,7 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
         my_arguments[core].nx = nx;
         my_arguments[core].nA = nA;
 //        my_arguments[core].R  = R;
-        ret=pthread_create(&thread[core], NULL, threaded_stats_fixed_R_func, (void *)&my_arguments[core]);
+        ret=pthread_create(&thread[core], NULL, threaded_stats_multi_R_func, (void *)&my_arguments[core]);
         if (ret!=0)
         {   printf("[compute_stats_multi_R_threads] TROUBLE! couldn't create thread!\n");
             return(-1); 
