@@ -4,7 +4,7 @@
 
 AC_PREREQ([2.71])
 AC_INIT([nn_stats], [0.3], [nicolas.garnier@ens-lyon.fr])
-AC_CONFIG_SRCDIR([src/nn_stats.c])
+AC_CONFIG_SRCDIR([src/nn_stats_fixed_k_threads.c])
 AC_CONFIG_HEADERS([config.h])
 
 #################################################################

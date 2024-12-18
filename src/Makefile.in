@@ -79,7 +79,7 @@ $(LIB_DIR)/libANN.a : $(BASE_DIR)/include/ANN/ANN.h
 $(BASE_DIR)/include/ANN/ANN.h :
 	cp ann_1.1.2/include/ANN/*.h $(BASE_DIR)/include/ANN/
 
-ANN_wrapper.o : $(BASE_DIR)/include/ANN/ANN.h $(BASE_DIR)/lib/libANN.a ANN_wrapper.cpp $(BASE_DIR)/include/ANN_wrapper.h
+ANN_wrapper.o : $(BASE_DIR)/include/ANN/ANN.h $(BASE_DIR)/lib/libANN.a ANN_wrapper.cpp ANN_stats.cpp $(BASE_DIR)/include/ANN_wrapper.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ -c ANN_wrapper.cpp
 
 ANN_wrapper_second_level.o : $(BASE_DIR)/include/ANN/ANN.h $(BASE_DIR)/lib/libANN.a ANN_wrapper_second_level.cpp $(BASE_DIR)/include/ANN_wrapper.h

@@ -26,13 +26,13 @@ matplotlib.rcParams['axes.formatter.use_mathtext'] = True
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # set parameters
 k=30
-R=0.45
+R=1.25
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # test with fixed k or fixed radius
 ###############################################################################
-Npts    = 200
+Npts    = 250
 ndim    = 1
 sigma_x = 1
 
@@ -101,10 +101,9 @@ P2.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[0]*nn[0], marker='o')
 P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[1]*nn[1], marker='o')
 P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[2]*nn[2], marker='o')
 P6.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[3]*nn[3], marker='o')
-print("output values of size", A_mean.shape, A_var.shape, "and", dists.shape)
+print("output values of size", A_mean.shape, A_var.shape, "and", nn.shape)
 print("nn",nn)
 print("A mean", A_mean)
-print("\telapsed time", time()-t1)
 
 print("differences:", np.nanmean(A_mean_0-A_mean[1]), np.nanstd(A_mean_0-A_mean[1]), np.nanmean(nn_0-nn[1]))
 #exit()

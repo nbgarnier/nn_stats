@@ -20,6 +20,7 @@
 #include "ANN/ANN.h"
 #include "ANN_wrapper.h"        // definitions of functions only
 //#include <stdio.h>              // for printf, to be removed
+//#include <iostream>
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables
@@ -244,8 +245,6 @@ double ANN_find_distance_ex(double *x, int n, int k, int core)
 int ANN_count_nearest_neighbors(double *x, double epsilon, int core)
 {   return(kdTree->annkFRSearch(x,      // query point
                         epsilon,        // squared radius (same as radius for L^\infty norm)
-                                        // algo 1 has condition "<epsilon", hence it requires a factor
-                                        // ( correction = (1.-1./ANNnpts) from calling function)
                         0,              // (number of near neighbors to return), k=0 to search and count
                         NULL, // nnIdx_1[core],  // nearest neighbors (returned if !=NULL)
                         NULL, // dists_1[core],  // distance (returned if !=NULL)

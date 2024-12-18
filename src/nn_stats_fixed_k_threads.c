@@ -42,7 +42,7 @@ struct thread_output
 array pos_out;      // for the locations (examination locations)
 array obs_in;       // for the observables at the initial locations
 arr_int k_in;       // for the nb of nn (input)
-k_vector k_in_vec;      // 2024-12-16 to be simplified with declaratino above
+k_vector k_in_vec;  // 2024-12-16 to be simplified with declaratino above
 array rad_out;      // for the radius of the k-nn (output)
 array obs_mean;     // for the local average, on the outpout locations (output)
 array obs_var;      // for the local variance, on the outpout locations (output)
@@ -132,7 +132,7 @@ int compute_stats_fixed_k_threads(double *x, double *A, int npts_in, int nx, int
         if (core==(nb_cores-1)) my_arguments[core].i_end = npts_out;    // last thread will work longer!
         my_arguments[core].nx = nx;
         my_arguments[core].nA = nA;
-        my_arguments[core].k = k;
+        my_arguments[core].k  = k;
         ret=pthread_create(&thread[core], NULL, threaded_stats_fixed_k_func, (void *)&my_arguments[core]);
         if (ret!=0)
         {   printf("[compute_stats_fixed_k_threads] TROUBLE! couldn't create thread!\n");

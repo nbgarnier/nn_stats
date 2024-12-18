@@ -73,15 +73,16 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
         return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.sqrt(PNP.asarray(dists))
     if (nb_R>0):   
         print("fixed R computation", end=" ")
-        nnn    = PNP.zeros((nb_R,npts_out), dtype=PNP.intc) 
+        nnn    = PNP.zeros((nb_R,npts_out), dtype=PNP.intc)
         A_mean = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
-        A_var  = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
+        A_var  = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)    
         if (nb_R==1):
             print("1 value of R :", R[0]) 
             ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &A_mean[0,0], &A_var[0,0], &nnn[0,0])
         else:
             print("multiple values of R :", PNP.array(R))
             ratou = nn_statistics.compute_stats_multi_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &R[0], nb_R, &A_mean[0,0], &A_var[0,0], &nnn[0,0])
+            return(PNP.asarray(A_mean).reshape(nb_R, nA, npts_out), PNP.asarray(A_var.reshape((nb_R, nA, npts_out))), PNP.asarray(nnn) )
         return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(nnn)
 
 

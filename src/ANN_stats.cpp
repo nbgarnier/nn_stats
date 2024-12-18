@@ -13,7 +13,8 @@
 #include "ANN/ANN.h"
 #include "ANN_wrapper.h"        // definitions of functions only
 #include "ANN_stats.h"          // definitions of functions only
-//#include <stdio.h>              // for printf, to be removed
+#include <stdio.h>              // for printf, to be removed
+#include <iostream>
 
 // #define UNUSED(expr) do { (void)(expr); } while (0)
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables
@@ -56,7 +57,7 @@ extern ANNkd_tree*	    kdTree;     // search structure
 /* 2024-10-15 - factorized loop on observables                                         */
 /***************************************************************************************/
 double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double *mean, double *var, int npts_out, int nA, int core)
-{   int i, d, N=k-1+ANN_ALLOW_SELF_MATCH;
+{   int i, d, N=k+ANN_ALLOW_SELF_MATCH-1;
     int npts=kdTree->nPoints();
     double tmp, m=0., v=0.;
 
@@ -81,8 +82,11 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
 
     }
     R[0] = (double)dists[core][N-1];
-//    printf("k=%d, N=%d, allow=%d   ", k, N, ANN_ALLOW_SELF_MATCH);
-//    return(0);
+#ifdef DEBUG    
+    std::printf("k=%d, N=%d, allow=%d    R[0]=%1.2f  R[1]=%1.2f  R[é]=%1.2f  R[N-1]=%1.2f  R[N]=%1.2f", 
+                k, N, ANN_ALLOW_SELF_MATCH, dists[core][0], dists[core][1], dists[core][2], dists[core][N-1], dists[core][N]);       //  fflush(stdout);
+//    std::cout << "k=" << k << ", N=" << N << ", allow=" << ANN_ALLOW_SELF_MATCH; fflush(stdout);
+#endif 
     return((double)dists[core][N-1]);
 } /* end of function "ANN_compute_stats_single_k" ***********************************************/
 
@@ -102,7 +106,7 @@ double ANN_compute_stats_multi_k(double *x, double *A, k_vector k_vec, double *R
 {   int i, d, N, N_old;
     int npts=kdTree->nPoints();
     double tmp; 
-    int ind_k, k_max=k_vec.A[k_vec.ind_max-1];                   // !!! k must be sorted, we take the largest
+    int ind_k, k_max=k_vec.A[k_vec.ind_max-1];  // !!! k must be sorted, we take the largest
 
     std::vector<double> m, v;                   // 2024/10/28: to optimize computations, C++ allocation 
     m.resize(nA); v.resize(nA);
