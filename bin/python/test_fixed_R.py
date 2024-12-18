@@ -26,13 +26,13 @@ matplotlib.rcParams['axes.formatter.use_mathtext'] = True
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # set parameters
 k=30
-R=0.5
+R=0.45
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # test with fixed k or fixed radius
 ###############################################################################
-Npts    = 500
+Npts    = 200
 ndim    = 1
 sigma_x = 1
 
@@ -58,7 +58,7 @@ val=np.ones((1,pos.shape[1]), dtype=float)
 print("input positions :", pos.shape, "with observables :", val.shape)
 
 # output grid (will be of size Nx_out^2):
-Nx_out = 50
+Nx_out = 10
 a = np.arange(1,Nx_out+1)*2-(Nx_out+1)
 b = np.ones(Nx_out+1)
 y = np.array((np.outer(a,b).flatten(),np.outer(b,a).flatten()), dtype=float)
@@ -82,29 +82,31 @@ print("\nfixed k =", k, end=" ")
 t1=time()
 [A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=np.array([k], dtype=np.intc))
 print("\telapsed time", time()-t1)
-P4.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists, marker='o')
+#P4.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists, marker='o')
 
 # single value of R:
 print("\nfixed R =", 2*R, end=" ")
 t1=time()
-[A_mean, A_var, nn] = ns.compute_local_stats(pos, val, y, R=np.array([2*R]))
+[A_mean_0, A_var_0, nn_0] = ns.compute_local_stats(pos, val, y, R=np.array([2*R]))
 print("\telapsed time", time()-t1)
-P2.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean*nn, marker='o')
+print("A mean 0", A_mean_0)
+P4.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean_0*nn_0, marker='o')
 
 # multiple values of R:
 print("\nfixed R =", [R, 2*R, 3*R, 4*R], end=" ")
 t1=time()
 [A_mean, A_var, nn] = ns.compute_local_stats(pos, val, y, R=np.array([R, 2*R, 3*R, 4*R]))
 print("\telapsed time", time()-t1)
-#P2.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[0]/dists[0], marker='o')
+P2.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[0]*nn[0], marker='o')
 P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[1]*nn[1], marker='o')
 P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[2]*nn[2], marker='o')
 P6.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[3]*nn[3], marker='o')
 print("output values of size", A_mean.shape, A_var.shape, "and", dists.shape)
-#print(dists)
-#print(A_mean)
+print("nn",nn)
+print("A mean", A_mean)
 print("\telapsed time", time()-t1)
 
+print("differences:", np.nanmean(A_mean_0-A_mean[1]), np.nanstd(A_mean_0-A_mean[1]), np.nanmean(nn_0-nn[1]))
 #exit()
 
 Fig.savefig("essai.pdf")

@@ -10,8 +10,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+    struct int_range
+    {   int ind_min;    // min index
+        int ind_max;    // max index
+        int N;          // total nb of index
+        int *A;         // index set
+    };
+    typedef struct int_range k_vector;
+
     double ANN_compute_stats_single_k(double *x, double *A, int k,          double *R, double *mean, double *var, int npts_out, int nA, int core); // new 2024
-    double ANN_compute_stats_multi_k (double *x, double *A, int *k, int Nk, double *R, double *mean, double *var, int npts_out, int nA, int core); // new 2024
+    double ANN_compute_stats_multi_k (double *x, double *A, k_vector k_vec, double *R, double *mean, double *var, int npts_out, int nA, int core); // new 2024
 
 #ifdef __cplusplus
 }

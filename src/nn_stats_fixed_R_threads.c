@@ -18,6 +18,21 @@
 #include "library_commons.h"   // for tree_k_max
 #include "data.h"       // for data structs
 
+#define noDEBUG
+#define i_look 388 // for debug
+
+void print_vec_int(int *v, int N)
+{   int i;
+    printf("(");
+    for (i=0; i<N; i++) printf("%d ", v[i]);
+    printf(")");
+}
+void print_vec(double *v, int N)
+{   int i;
+    printf("(");
+    for (i=0; i<N; i++) printf("%1.2f ", v[i]);
+    printf(")");
+}
 
 // thread arguments and outputs types:
 struct thread_args
@@ -31,9 +46,6 @@ struct thread_args
 
 struct thread_output
     {   int n_eff;
-        int n_errors;
-        double mean;
-        double var;
     };
 
 
@@ -60,8 +72,7 @@ void *threaded_stats_fixed_R_func(void *ptr)
         nx       = args->nx,
         nA       = args->nA;
     double R     = args->R;
-    int n_eff    = i_end-i_start, // how many points in this thread
-        l_errors = 0;
+    int n_eff    = i_end-i_start; // how many points in this thread
     double ratou[2];
 
     double queryPt[nx]; // to be optimized
@@ -82,7 +93,6 @@ void *threaded_stats_fixed_R_func(void *ptr)
     }
     
     out->n_eff    = n_eff;
-    out->n_errors = l_errors;
         
 //    printf("\t\t%d-%d=%d\n", i_start, i_end, i_end-i_start);
 //        free(args);
@@ -168,7 +178,6 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
 } /* end of function "compute_stats_fixed_R_threads" *************************************/
 
 
-#define i_look 188 // for debug
 
 /****************************************************************************************/
 /* function to be used by "compute_stats_multi_R_threads"                               */
@@ -178,48 +187,71 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
 void *threaded_stats_multi_R_func(void *ptr)
 {   struct thread_args  *args = (struct thread_args *)ptr; // cast arguments to the usable struct
     struct thread_output *out = calloc(sizeof(struct thread_output),1); // allocate heap memory for this thread's results
-    register int i,j,d;
-    int *local_k, ind_k_min, ind_k_max;
+    register int i,j,j2,d;
+    int ind_k_min, ind_k_max;
     int core     = args->core,
         i_start  = args->i_start,
         i_end    = args->i_end,
         nx       = args->nx,
         nA       = args->nA;
-    int n_eff    = i_end-i_start, // how many points in this thread
-        l_errors = 0;
+    int n_eff    = i_end-i_start; // how many points in this thread
+    k_vector    k_vec;
 
     double queryPt[nx]; // to be optimized
-    local_k = calloc(R_in.dim, sizeof(int));
+    k_vec.A =  calloc(R_in.dim, sizeof(int));
+    k_vec.N = R_in.dim;
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
+
+        j=0;
+        do
+        {   k_vec.A[j] = ANN_count_nearest_neighbors(queryPt, R_in.A[j], core);
+            nnn_out.A[i + obs_mean.Npts*j]= k_vec.A[j];
+            j++;
+        }
+        while ( (j<R_in.dim) && (k_vec.A[j-1]<tree_k_max) );
+        printf("point %d ", i); print_vec(queryPt, nx); printf(" -> j=%d (k=%d)\t k = ", j, k_vec.A[j-1]);
+        for (j2=j; j2<R_in.dim; j2++)
+        {   k_vec.A[j2]                     = tree_k_max;
+            nnn_out.A[i + obs_mean.Npts*j2] = tree_k_max;
+        }
+        print_vec_int(k_vec.A, k_vec.N);
+
+        // search for the range of valid k values and keep their index:
+        ind_k_min=0;
+        while ((k_vec.A[ind_k_min]<1) && (ind_k_min<R_in.dim)) ind_k_min++;
+        ind_k_max=ind_k_min;
+        while ((k_vec.A[ind_k_max]<tree_k_max) && (ind_k_max<R_in.dim)) ind_k_max++;
+        printf(" k min and max at %d - %d\t", ind_k_min, ind_k_max);
+#ifdef DEBUG
         if ((i%i_look)==0)
         {   printf("point %d ( ", i); 
             for (d=0; d<nx; d++) printf("%1.2f ,", queryPt[d]);
             printf(")\t");
+            for (j=0; j<R_in.dim; j++) printf("  R=%1.2f -> k=%d", R_in.A[j], local_k[j]);
+            printf("\n");
+            printf("\t ind_k_min = %d => k_min = %d, \tind_k_max = %d => k_max = %d\n", ind_k_min, local_k[ind_k_min], ind_k_max, local_k[ind_k_max-1]);
         }
+#endif
 
-        for (j=0; j<R_in.dim; j++)
-        {   local_k[j] = ANN_count_nearest_neighbors(queryPt, R_in.A[j], core);
-            nnn_out.A[j]= local_k[j];
-            if ((i%i_look)==0)
-            {   printf("  R=%1.2f -> k=%d", R_in.A[j], local_k[j]);
+        // work in the range of valid k:
+        if ( (ind_k_min<R_in.dim) && (ind_k_min<ind_k_max) )
+        {   k_vec.ind_min = ind_k_min;
+            k_vec.ind_max = ind_k_max;
+//            if (k_vec.ind_min>0) printf("point %d, ind_min=%d (k=%d) -> PB!\n", i, k_vec.ind_min, k_vec.A[k_vec.ind_min]);
+            if (k_vec.ind_max>R_in.dim) printf("point %d, ind_max=%d -> PB!\n", i, k_vec.ind_max);
+            
+            // check k values:
+            for (j=0; j<R_in.dim-1; j++)
+            {   if (k_vec.A[j]>k_vec.A[j+1]) printf("\n\n point %d : k not ordered: %d %d \n", i, k_vec.A[j], k_vec.A[j+1]);
+
             }
-
+            ANN_compute_stats_multi_k(queryPt, obs_in.A, k_vec, NULL, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
+            printf("OK\n");
         }
-        if ((i%i_look)==0) printf("\n");
+        else printf("point %d rejected\n", i);
 
-        // search for the range of valid k values and keep their index:
-        ind_k_min=0;
-        while ((local_k[ind_k_min]<1) && (ind_k_min<R_in.dim)) ind_k_min++;
-        ind_k_max=ind_k_min;
-        while ((local_k[ind_k_max]<tree_k_max) && (ind_k_max<=R_in.dim-1)) ind_k_max++;
-//        if (local_k[ind_k_max]<tree_k_max) 
-        ind_k_max--;
-        if ((i%i_look)==0) 
-        {   printf("\t ind_k_min = %d => k_min = %d, \tind_k_max = %d => k_max = %d\n", ind_k_min, local_k[ind_k_min], ind_k_max, local_k[ind_k_max]);
-
-        }
 
         int my_min = (ind_k_min<R_in.dim) ? ind_k_min : R_in.dim;
         for (j=0; j<my_min; j++)                             // 2024/10/29 unchecked inside the loop
@@ -228,25 +260,20 @@ void *threaded_stats_multi_R_func(void *ptr)
                 (obs_var.A +i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
             }
         }
-        for (j=ind_k_max+1; j<R_in.dim; j++)                     
+        for (j=ind_k_max; j<R_in.dim; j++)                     
         {   for (d=0; d<nA; d++)
             {   (obs_mean.A+i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
                 (obs_var.A +i)[obs_mean.Npts*(j+d*R_in.dim)] = my_NAN;
             }
         }
 
-        // work in the range of valid k:
-        if ( (ind_k_min<R_in.dim) && (ind_k_min<ind_k_max) )
-            ANN_compute_stats_multi_k(queryPt, obs_in.A, local_k+ind_k_min, ind_k_max-ind_k_min+1, NULL, obs_mean.A+i, obs_var.A+i, obs_mean.Npts, obs_mean.dim, core);
-        
     }
     
     out->n_eff    = n_eff;
-    out->n_errors = l_errors;
         
 //    printf("\t\t%d-%d=%d\n", i_start, i_end, i_end-i_start);
 //        free(args);
-    free(local_k);
+    free(k_vec.A);
     pthread_exit(out);
 }
 
@@ -316,7 +343,6 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
     }
     for (core=0; core<nb_cores; core++)
     {   pthread_join(thread[core], (void**)&my_outputs[core]);
-
         n_total += my_outputs[core]->n_eff; // just for sanity
         free(my_outputs[core]);
     }

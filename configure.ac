@@ -1,5 +1,5 @@
-# -*- Autoconf script for entropy -*-
-# N.B.Garnier, 2023-09-22
+# -*- Autoconf script for nearest neighbors statistics -*-
+# N.B.Garnier, 2024-09-22
 #################################################################
 
 AC_PREREQ([2.71])

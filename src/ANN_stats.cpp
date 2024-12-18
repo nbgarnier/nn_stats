@@ -96,12 +96,13 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
 /*                                                                                      */
 /* 2024-10-17 - initial fork                                                            */
 /* 2024-10-29 - full rewritting, for optimization                                       */
+/* 2024-12-16 - replaced int *k, int Nk by k_vector k_vec                               */
 /****************************************************************************************/
-double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R, double *mean, double *var, int npts_out, int nA, int core)
+double ANN_compute_stats_multi_k(double *x, double *A, k_vector k_vec, double *R, double *mean, double *var, int npts_out, int nA, int core)
 {   int i, d, N, N_old;
     int npts=kdTree->nPoints();
     double tmp; 
-    int ind_k, k_max=k[Nk-1];                   // !!! k must be sorted, we take the largest
+    int ind_k, k_max=k_vec.A[k_vec.ind_max-1];                   // !!! k must be sorted, we take the largest
 
     std::vector<double> m, v;                   // 2024/10/28: to optimize computations, C++ allocation 
     m.resize(nA); v.resize(nA);
@@ -117,8 +118,8 @@ double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R
     {   m[d]=0.; v[d]=0.;
     }
 
-    for (ind_k=0; ind_k<Nk; ind_k++)
-    {   N=k[ind_k]-1+ANN_ALLOW_SELF_MATCH;
+    for (ind_k=k_vec.ind_min; ind_k<k_vec.ind_max; ind_k++)
+    {   N=k_vec.A[ind_k]-1+ANN_ALLOW_SELF_MATCH;
         if (R!=NULL) R[npts_out*ind_k] = (double)dists[core][N-1];
 
         for (d=0; d<nA; d++)
@@ -126,8 +127,8 @@ double ANN_compute_stats_multi_k(double *x, double *A, int *k, int Nk, double *R
             {   tmp = (A+npts*d)[nnIdx[core][i]]; 
                 m[d]  += tmp;  v[d] += tmp*tmp;
             }
-            mean[npts_out*(ind_k+d*Nk)] = m[d]/N;
-            var [npts_out*(ind_k+d*Nk)] = (v[d]-m[d]*m[d]/N)/(N-1);  // unbiased estimator
+            mean[npts_out*(ind_k+d*k_vec.N)] = m[d]/N;
+            var [npts_out*(ind_k+d*k_vec.N)] = (v[d]-m[d]*m[d]/N)/(N-1);  // unbiased estimator
         }
 
         N_old=N;

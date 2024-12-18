@@ -19,4 +19,3 @@ struct discrete_process
         int *A;     // observables data
     };
 typedef struct discrete_process arr_int;
-
