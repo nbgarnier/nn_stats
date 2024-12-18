@@ -37,4 +37,4 @@ src/cython/nn_stats/nn_statistics.c
 src/nn_stats.c
 .gitignore
 entropy.dev..code-workspace
-.vscode/c_cpp_properties.json
+.vscode/*
