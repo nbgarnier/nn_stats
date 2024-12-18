@@ -41,7 +41,7 @@ struct thread_output
 // dangerous: global variables:
 array pos_out;      // for the locations (examination locations)
 array obs_in;       // for the observables at the initial locations
-arr_int k_in;       // for the nb of nn (input)
+// arr_int k_in;       // for the nb of nn (input)
 k_vector k_in_vec;  // 2024-12-16 to be simplified with declaratino above
 array rad_out;      // for the radius of the k-nn (output)
 array obs_mean;     // for the local average, on the outpout locations (output)
@@ -227,7 +227,7 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
     // dangerous: we use global variables:
     pos_out.Npts =npts_out; pos_out.dim =nx;    pos_out.A =y;
     obs_in.Npts  =npts_in;  obs_in.dim  =nA;    obs_in.A  =A;
-    k_in.Npts    =1;        k_in.dim    =nk;    k_in.A    =k;
+//    k_in.Npts    =1;        k_in.dim    =nk;    k_in.A    =k;
     k_in_vec.N   =nk;       k_in_vec.ind_min=0;     k_in_vec.ind_max=nk;        k_in_vec.A = k;
     rad_out.Npts =npts_out; rad_out.dim =nk;    rad_out.A =dists;       // note 2024-10-29: all requested k are returned
     obs_mean.Npts=npts_out; obs_mean.dim=nA;    obs_mean.A=A_mean;

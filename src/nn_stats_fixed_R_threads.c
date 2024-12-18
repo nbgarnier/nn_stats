@@ -304,7 +304,7 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
     
     if (nb_cores<1) set_cores_number(nb_cores); // auto-detect, if asked for
     nb_cores=get_cores_number(GET_CORES_SELECTED);     
-    nb_cores=1;       
+ //   nb_cores=1;       
     // 2022-12-13: all other threads number manipulation should be done outside of this engine function!
     npts_eff_min   = (npts_out - (npts_out%nb_cores))/nb_cores;  // nb pts mini dans chaque thread
     

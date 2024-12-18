@@ -83,7 +83,7 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
     }
     R[0] = (double)dists[core][N-1];
 #ifdef DEBUG    
-    std::printf("k=%d, N=%d, allow=%d    R[0]=%1.2f  R[1]=%1.2f  R[é]=%1.2f  R[N-1]=%1.2f  R[N]=%1.2f", 
+    std::printf("k=%d, N=%d, allow=%d    R[0]=%1.2f  R[1]=%1.2f  R[2]=%1.2f  R[N-1]=%1.2f  R[N]=%1.2f", 
                 k, N, ANN_ALLOW_SELF_MATCH, dists[core][0], dists[core][1], dists[core][2], dists[core][N-1], dists[core][N]);       //  fflush(stdout);
 //    std::cout << "k=" << k << ", N=" << N << ", allow=" << ANN_ALLOW_SELF_MATCH; fflush(stdout);
 #endif 
