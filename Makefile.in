@@ -50,7 +50,7 @@ zip : clean
 	$(TAR) -rvf code.tar install-sh config.guess config.sub config.h.in
 	$(TAR) -rvf code.tar include/
 	$(TAR) -rvf code.tar src/ann_1.1.2/*
-	$(TAR) -rvf code.tar src/ANN_wrapper.cpp src/ANN_wrapper_second_level.cpp \
+	$(TAR) -rvf code.tar src/ANN_wrapper.cpp \
 		src/ANN_stats.cpp src/ANN_threads.c src/library_commons.c \
 		src/nn_stats_fixed_k_threads.c src/nn_stats_fixed_R_threads.c \
 		src/nn_stats.c

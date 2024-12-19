@@ -45,7 +45,7 @@ ifeq ($(PLATFORM),LINUX)
 endif
 
 # common C objects:
-OBJS = ANN_wrapper.o ANN_wrapper_second_level.o ANN_stats.o \
+OBJS = ANN_wrapper.o ANN_stats.o \
 	ANN_threads.o library_commons.o verbosity.o timings.o \
 	nn_stats_fixed_k_threads.o nn_stats_fixed_R_threads.o 
 

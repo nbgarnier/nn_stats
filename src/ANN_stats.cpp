@@ -15,6 +15,7 @@
 #include "ANN_stats.h"          // definitions of functions only
 #include <stdio.h>              // for printf, to be removed
 #include <iostream>
+#include <vector>               // for Debian compile
 
 // #define UNUSED(expr) do { (void)(expr); } while (0)
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables
@@ -103,7 +104,7 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
 /* 2024-12-16 - replaced int *k, int Nk by k_vector k_vec                               */
 /****************************************************************************************/
 double ANN_compute_stats_multi_k(double *x, double *A, k_vector k_vec, double *R, double *mean, double *var, int npts_out, int nA, int core)
-{   int i, d, N, N_old;
+{   int i, d, N=1, N_old;
     int npts=kdTree->nPoints();
     double tmp; 
     int ind_k, k_max=k_vec.A[k_vec.ind_max-1];  // !!! k must be sorted, we take the largest

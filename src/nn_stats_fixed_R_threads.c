@@ -50,12 +50,15 @@ struct thread_output
 
 
 // dangerous: global variables:
-array   pos_out;      // for the locations (examination locations)
-array   obs_in;       // for the observables at the initial locations
-array   R_in;         // for the nb of nn (input)
-arr_int nnn_out;      // for the nb of nn (output)
-array   obs_mean;     // for the local average, on the outpout locations (output)
-array   obs_var;      // for the lcoal variance, on the outpout locations (output)
+// first ones are already defined in "nn_stats_fixed_k_threads.c":
+extern array   pos_out;     // for the locations (examination locations)
+extern array   obs_in;      // for the observables at the initial locations
+extern array   obs_mean;    // for the local average, on the outpout locations (output)
+extern array   obs_var;     // for the lcoal variance, on the outpout locations (output)
+// last ones are specific to this file:
+array   R_in;               // for the nb of nn (input)
+arr_int nnn_out;            // for the nb of nn (output)
+
 
 /****************************************************************************************/
 /* function to be used by "compute_stats_fixed_R_threads"                               */
