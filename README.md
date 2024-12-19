@@ -8,9 +8,13 @@ This library relies on the [ANN library](http://www.cs.umd.edu/~mount/ANN/) by D
   
 # how to use in Python
 - there is a single function, called "compute_local_stats", which can be invoked in 2 different ways:
- * by imposing a set of values of k (numbers of neighbors to consider)
- * by imposing a set of values of R (radii to consider)
+    > by imposing a set of values of k (numbers of neighbors to consider)
+    > by imposing a set of values of R (radii to consider)
 
+ The function expects:
+    > a set of initial locations in a n-dimensional space
+    > a set of observables values taken on the initial locations
+    
 - there are examples in the bin/python subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
 <pre><code>
 import numpy as np
