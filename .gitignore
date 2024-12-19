@@ -34,7 +34,5 @@ src/cython/nn_stats/__pycache__/
 src/cython/nn_stats/build/ 
 src/cython/nn_stats/a__init__.py
 src/cython/nn_stats/nn_statistics.c 
-src/nn_stats.c
-.gitignore
 entropy.dev..code-workspace
-.vscode/*
+.vscode/
