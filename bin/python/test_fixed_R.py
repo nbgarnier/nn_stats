@@ -98,4 +98,3 @@ print("output values of size", A_mean.shape, A_var.shape, "and", nn.shape)
 
 Fig.savefig("test_fixed_R.pdf")
 
-# %%
