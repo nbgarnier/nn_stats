@@ -18,8 +18,8 @@
 #include "library_commons.h"   // for tree_k_max
 #include "data.h"       // for data structs
 
-#define noDEBUG // can also set DEBUG_N
-#define i_look 388 // for debug with DEBUG_N
+#define noDEBUG // set to "DEBUG". can also set to "DEBUG_N"
+#define i_look 388 // for debug with "DEBUG_N"
 
 void print_vec_int(int *v, int N)
 {   int i;
