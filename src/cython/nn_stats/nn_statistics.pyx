@@ -18,7 +18,7 @@ include "commons.pyx"   # for basic library manipulation
 @cython.wraparound(False)
 def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y, 
                             int[::1] k=PNP.zeros(shape=(1),dtype=PNP.intc), 
-                            double[::1] R=PNP.zeros(shape=(1),dtype=PNP.float64)):
+                            double[::1] R=PNP.zeros(shape=(1),dtype=PNP.float64), verbosity=get_verbosity()):
     """     
     compute local averages (and corresponding stds) of observables A (possibly multi-dimensional)
     given at locations x (usually 2-dimensional).
@@ -32,6 +32,7 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
     :param y: locations/positions (NumPy array with ndim=2, all coordinates along 1st dimension) where statistics will be computed.
     :param k: 1d-array (int) of number of neighbors to consider for a fixed-k computation.
     :param R: 1d-array of radii to consider for a fixed-radius computation.
+    :param verbosity: 0 to operate quietly without any message or larger value for more message (default value can be set by function "set_verbosity")
                  
     :returns: the local averages of A over y, using either fixed-k or fixed-R.
     """
@@ -60,30 +61,33 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
     
     if (k[0]>0):
         if (k[nb_k-1]>=npts_in):    raise ValueError("imposed k is larger than the number of input points!")
-        print("fixed k computation", end=" ")
+        if verbosity: print("fixed k computation", end=" ")
         dists  = PNP.zeros((nb_k,npts_out), dtype=PNP.float64) 
         A_mean = PNP.zeros((nb_k*nA,npts_out), dtype=PNP.float64)
         A_var  = PNP.zeros((nb_k*nA,npts_out), dtype=PNP.float64) 
         if (nb_k==1):
-            print("1 value of k :", k[0])
+            if verbosity: print("1 value of k :", k[0])
             ratou  = nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &A_mean[0,0], &A_var[0,0], &dists[0,0])
+            return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.sqrt(PNP.asarray(dists))
         else:
-            print("multiple values of k :", PNP.array(k))
+            if verbosity: print("multiple values of k :", PNP.array(k))
             ratou  = nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &A_mean[0,0], &A_var[0,0], &dists[0,0])
-        return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.sqrt(PNP.asarray(dists))
+            return(PNP.asarray(A_mean).reshape(nb_k, nA, npts_out), PNP.asarray(A_var.reshape((nb_k, nA, npts_out))), PNP.asarray(dists) )
+        
     if (nb_R>0):   
-        print("fixed R computation", end=" ")
+        if verbosity: print("fixed R computation", end=" ")
         nnn    = PNP.zeros((nb_R,npts_out), dtype=PNP.intc)
         A_mean = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
         A_var  = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)    
         if (nb_R==1):
-            print("1 value of R :", R[0]) 
+            if verbosity: print("1 value of R :", R[0]) 
             ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &A_mean[0,0], &A_var[0,0], &nnn[0,0])
+            return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(nnn)
         else:
-            print("multiple values of R :", PNP.array(R))
+            if verbosity: print("multiple values of R :", PNP.array(R))
             ratou = nn_statistics.compute_stats_multi_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &R[0], nb_R, &A_mean[0,0], &A_var[0,0], &nnn[0,0])
             return(PNP.asarray(A_mean).reshape(nb_R, nA, npts_out), PNP.asarray(A_var.reshape((nb_R, nA, npts_out))), PNP.asarray(nnn) )
-        return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(nnn)
+        
 
 
 
@@ -96,7 +100,7 @@ def set_nn_max(int k=nn_statistics.k_default):
     """
     nn_statistics.tree_k_max=k
     
-def get_nn():
+def get_nn_max():
     """
     gets the current maximal value of allowed number of nearest neighbors
     
