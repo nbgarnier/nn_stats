@@ -4,10 +4,13 @@ This library relies on the [ANN library](http://www.cs.umd.edu/~mount/ANN/) by D
 
 # compilation and installation
 - run ./configure and eventually solve the issues by installing missing programs and libraries (e.g.: "apt install libtool-bin" on Linux if asked to do so)
-- then run "make python" to produce the library.
+- then run "make python" to produce the library. This will both compile the library and install it in your python path, which depends on you current environment. You should select your environment first, then run "./configure" and "make python", in order to have the library and its functions available in your favored environment.
   
 # how to use in Python
-- "make python" will both compile the library and install it in your python path, which depends on you current environment. You should select your environment first, then run "./configure" and "make python", in order to have the library and its functions available in your favored environment.
+- there is a single function, called "compute_local_stats", which can be invoked in 2 different ways:
+ * by imposing a set of values of k (numbers of neighbors to consider)
+ * by imposing a set of values of R (radii to consider)
+
 - there are examples in the bin/python subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
 <pre><code>
 import numpy as np
