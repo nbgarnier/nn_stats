@@ -20,7 +20,9 @@ def compute_local_stats( double[:, ::1] x,
                             double[:, ::1]  A = PNP.zeros(shape=(0,1),dtype=PNP.float64), 
                             double [:, ::1] y = PNP.zeros(shape=(0,1),dtype=PNP.float64), 
                             int[::1]        k = PNP.zeros(shape=(1),dtype=PNP.intc), 
-                            double[::1]     R = PNP.zeros(shape=(1),dtype=PNP.float64), verbosity=get_verbosity()):
+                            double[::1]     R = PNP.zeros(shape=(1),dtype=PNP.float64), 
+                            int             order_max = 2,
+                            int             verbosity = get_verbosity()):
     """     
     compute local averages (and corresponding stds) of observables A (possibly multi-dimensional)
     given at locations x (usually 2-dimensional).
@@ -37,6 +39,7 @@ def compute_local_stats( double[:, ::1] x,
                 If this parameter is not provided, the initial locations/positions will be used.
     :param k: 1d-array (int) of number of neighbors to consider for a fixed-k computation.
     :param R: 1d-array of radii to consider for a fixed-radius computation.
+    :param order_max: maximal order of the moments to be computed (default=2)
     :param verbosity: 0 to operate quietly without any message or larger value for more message 
                 (default value can be set by function "set_verbosity")
                  
@@ -53,49 +56,52 @@ def compute_local_stats( double[:, ::1] x,
     
     cdef CNP.ndarray[dtype=double, ndim=2, mode='c'] dists  #= void;
     cdef CNP.ndarray[dtype=int,    ndim=2, mode='c'] nnn
-    cdef CNP.ndarray[dtype=double, ndim=2, mode='c'] A_mean 
-    cdef CNP.ndarray[dtype=double, ndim=2, mode='c'] A_var 
+    cdef CNP.ndarray[dtype=double, ndim=2, mode='c'] moments 
      
     if (npts_in<nx):      raise ValueError("please transpose x")
     if (npts_A<nA):       raise ValueError("please transpose A")
     if (npts_out<ny):     raise ValueError("please transpose y")
     if (npts_A!=npts_in): raise ValueError("A and x do not have the same nb of points!")
     if (ny!=nx):          raise ValueError("y and x do not have the same dimensionality!")
+    if (order_max<1):     raise ValueError("order_max must be at least 1")
     if ( (nb_k>1) or (k[0]>0) ) and ( (nb_R>1) or (R[0]>0) ):
                           raise ValueError("specify either k or radius R, but not both!")
     if (nb_k>1) and (PNP.min(PNP.diff(k))<0):   raise ValueError("k should be sorted (with increasing values)")
     if (nb_R>1) and (PNP.min(PNP.diff(R))<0):   raise ValueError("R should be sorted (with increasing values)")
     if (k[0]==0) and (R[0]==0):                 raise ValueError("specify at least k or radius R!")
     
+    if verbosity: print("computing moments of order 1 up to", order_max)
+
     if (k[0]>0):
         if (k[nb_k-1]>=npts_in):    raise ValueError("imposed k is larger than the number of input points!")
         if verbosity: print("fixed k computation", end=" ")
-        dists  = PNP.zeros((nb_k,npts_out), dtype=PNP.float64) 
-        A_mean = PNP.zeros((nb_k*nA,npts_out), dtype=PNP.float64)
-        A_var  = PNP.zeros((nb_k*nA,npts_out), dtype=PNP.float64) 
+        dists   = PNP.zeros((nb_k,npts_out), dtype=PNP.float64) 
+        moments = PNP.zeros((order_max*nb_k*nA,npts_out), dtype=PNP.float64)
+#        A_var  = PNP.zeros((nb_k*nA,npts_out), dtype=PNP.float64) 
         if (nb_k==1):
             if verbosity: print("1 value of k :", k[0])
-            ratou  = nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &A_mean[0,0], &A_var[0,0], &dists[0,0])
-            return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.sqrt(PNP.asarray(dists))
+            ratou  = nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &moments[0,0], order_max, &dists[0,0])
+            return  PNP.asarray(moments).reshape(order_max, nA, npts_out), PNP.sqrt(PNP.asarray(dists))
         else:
             if verbosity: print("multiple values of k :", PNP.array(k))
-            ratou  = nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &A_mean[0,0], &A_var[0,0], &dists[0,0])
-            return(PNP.asarray(A_mean).reshape(nb_k, nA, npts_out), PNP.asarray(A_var.reshape((nb_k, nA, npts_out))), PNP.sqrt(PNP.asarray(dists)) )
+            ratou  = nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &moments[0,0], order_max, &dists[0,0])
+            return(PNP.asarray(moments).reshape(order_max, nb_k, nA, npts_out), PNP.sqrt(PNP.asarray(dists)) )
         
     if (nb_R>0):   
         if verbosity: print("fixed R computation", end=" ")
         for ratou in range(nb_R): R[ratou]=R[ratou]**2 # internal code expects squared distances
-        nnn    = PNP.zeros((nb_R,npts_out), dtype=PNP.intc)
-        A_mean = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
-        A_var  = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)    
+        nnn     = PNP.zeros((nb_R,npts_out), dtype=PNP.intc)
+        moments = PNP.zeros((order_max*nb_R*nA,npts_out), dtype=PNP.float64)
+#        A_mean = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
+#        A_var  = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)    
         if (nb_R==1):
             if verbosity: print("1 value of R :", R[0]) 
-            ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &A_mean[0,0], &A_var[0,0], &nnn[0,0])
-            return  PNP.asarray(A_mean), PNP.asarray(A_var), PNP.asarray(nnn)
+            ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &moments[0,0], order_max, &nnn[0,0])
+            return  PNP.asarray(moments).reshape(order_max, nA, npts_out), PNP.asarray(nnn)
         else:
             if verbosity: print("multiple values of R :", PNP.array(R))
-            ratou = nn_statistics.compute_stats_multi_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &R[0], nb_R, &A_mean[0,0], &A_var[0,0], &nnn[0,0])
-            return(PNP.asarray(A_mean).reshape(nb_R, nA, npts_out), PNP.asarray(A_var.reshape((nb_R, nA, npts_out))), PNP.asarray(nnn) )
+            ratou = nn_statistics.compute_stats_multi_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &R[0], nb_R, &moments[0,0], order_max, &nnn[0,0])
+            return(PNP.asarray(moments).reshape(order_max, nb_R, nA, npts_out), PNP.asarray(nnn) )
         
 
 

@@ -38,6 +38,7 @@ def get_verbosity():
         
     """
     print("verbosity level", commons.lib_verbosity)
+    return(commons.lib_verbosity)
 
 
 

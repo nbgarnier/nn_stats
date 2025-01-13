@@ -19,8 +19,9 @@ extern "C" {
     };
     typedef struct int_range k_vector;
 
-    double ANN_compute_stats_single_k(double *x, double *A, int k,          double *R, double *mean, double *var, int npts_out, int nA, int core); // new 2024
-    double ANN_compute_stats_multi_k (double *x, double *A, k_vector k_vec, double *R, double *mean, double *var, int npts_out, int nA, int core); // new 2024
+    double ANN_compute_stats_single_k(double *x, double *A, int k,          double *R, double *moments, int order_max, int npts_out, int nA, int core);
+
+    double ANN_compute_stats_multi_k (double *x, double *A, k_vector k_vec, double *R, double *moments, int order_max, int npts_out, int nA, int core);
 
 #ifdef __cplusplus
 }

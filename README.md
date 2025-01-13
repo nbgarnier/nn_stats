@@ -18,11 +18,13 @@ There is a single function, called **"compute_local_stats"**, which can be invok
 
  The function expects (these are mandatory):
   * a set of initial locations (parameter "x") in a n-dimensional space
-  * either a set of alues of k (parameterr "k") or a set of values of R (parameter "R")
+  * either a set of values of k (parameter "k") or a set of values of R (parameter "R")
 
 The following parameters can also be provided:
-  * a set of observables values taken on the initial locations (parameter "A"); by default, this set is empty and no moments are computed.
-  * a set of "destination" locations (parameter "y") where the statistics of observables will be computed; by default, if you do not provide these "destination" locations, the "initial" locations will be used.
+  * a set of observables values taken on the initial locations (parameter "A"). By default, this set is empty and no moments are computed.
+  * a set of "destination" locations (parameter "y") where the statistics of observables will be computed. By default, if you do not provide these "destination" locations, the "initial" locations will be used.
+  * a maximal order for moments computation (parameter "order_max"). Moments of order 1, 2, ..., order_max will be computed. By default, order_max=2.
+  * (to-do!) a boolean to indicate if moments are for the centered (True) or non-centered (False) observables. By default, moments are not centered.
   
 There are examples in the examples/ subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
 <pre><code>
@@ -82,7 +84,7 @@ Their .shape[1] is simply the number of available points, which should be the sa
 mean, var, R = ns.compute_local_stats(locations, y=loc_new, k=k)   # imposed k -> returns R at new locations loc_new
 mean, var, k = ns.compute_local_stats(locations, y=loc_new, R=R)   # imposed R -> returns k at new locations loc_new
 </code></pre>
-Note that in thaat case, if you want to provide a set of "destination" locations, you have to explicitly prefix them with "y=". If you do not do so, the function will expect its second parameter to be the observables, but they would be the "destination" locations.
+Note that in that case, if you want to provide a set of "destination" locations, you have to explicitly prefix them with "y=". If you do not do so, the function will expect its second parameter to be the observables, but they would be the "destination" locations.
 
 Note that there are still 3 output variables, even in that case (mean and var should be empty).
 
