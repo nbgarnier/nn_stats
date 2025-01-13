@@ -18,10 +18,12 @@ There is a single function, called **"compute_local_stats"**, which can be invok
 
  The function expects (these are mandatory):
   * a set of initial locations in a n-dimensional space
-  * a set of observables values taken on the initial locations; this set can be empty, see "other remarks" below
-  * a set of "destination" locations, where the statistics of observables will be computed
   * either a set of alues of k or a set of values of R 
 
+The following parameters can also be provided:
+  * a set of observables values taken on the initial locations; by default, this set is empty
+  * a set of "destination" locations, where the statistics of observables will be computed; by default, these "destination" locations are the same as the "initial" locations.
+  
 There are examples in the examples/ subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
 <pre><code>
 import numpy as np
