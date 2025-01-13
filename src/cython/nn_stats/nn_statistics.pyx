@@ -17,8 +17,8 @@ include "commons.pyx"   # for basic library manipulation
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def compute_local_stats( double[:, ::1] x, 
-                            double[:, ::1]  A = PNP.zeros(shape=(0,0),dtype=PNP.float64), 
-                            double [:, ::1] y = PNP.zeros(shape=(0,0),dtype=PNP.float64), 
+                            double[:, ::1]  A = PNP.zeros(shape=(0,1),dtype=PNP.float64), 
+                            double [:, ::1] y = PNP.zeros(shape=(0,1),dtype=PNP.float64), 
                             int[::1]        k = PNP.zeros(shape=(1),dtype=PNP.intc), 
                             double[::1]     R = PNP.zeros(shape=(1),dtype=PNP.float64), verbosity=get_verbosity()):
     """     
@@ -44,7 +44,7 @@ def compute_local_stats( double[:, ::1] x,
     """
     
     cdef int npts_in =x.shape[1], nx=x.shape[0], ratou  # 2018-04-13: carefull with ordering of dimensions!
-    if (A.shape[0]==0): A=PNP.zeros( (0, npts_in))       # 2025-01-13: if A is not provided, we set it to appropriate shape
+    if (A.shape[0]==0): A=PNP.zeros( (0, npts_in))      # 2025-01-13: if A is not provided, we set it to appropriate shape
     cdef int npts_A  =A.shape[1], nA=A.shape[0]
     if (y.shape[0]==0): y=x.copy()                      # 2025-01-13: if destination locations are not provided, we use initial locations
     cdef int npts_out=y.shape[1], ny=y.shape[0]
