@@ -79,7 +79,7 @@ nn_module = Extension(
                 )
           
 setup(name = 'nn_stats',
-      version = '0.5.3', 
+      version = '0.6.3', 
 #      date ='2025.01.13',
       description = "nearest neighbors local estimates",
       author      = "Nicolas B. Garnier",

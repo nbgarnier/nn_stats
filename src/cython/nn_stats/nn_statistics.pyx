@@ -72,11 +72,11 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
         else:
             if verbosity: print("multiple values of k :", PNP.array(k))
             ratou  = nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &A_mean[0,0], &A_var[0,0], &dists[0,0])
-            return(PNP.asarray(A_mean).reshape(nb_k, nA, npts_out), PNP.asarray(A_var.reshape((nb_k, nA, npts_out))), PNP.asarray(dists) )
+            return(PNP.asarray(A_mean).reshape(nb_k, nA, npts_out), PNP.asarray(A_var.reshape((nb_k, nA, npts_out))), PNP.sqrt(PNP.asarray(dists)) )
         
     if (nb_R>0):   
         if verbosity: print("fixed R computation", end=" ")
-        R      = R*R;
+        for ratou in range(nb_R): R[ratou]=R[ratou]**2 # internal code expects squared distances
         nnn    = PNP.zeros((nb_R,npts_out), dtype=PNP.intc)
         A_mean = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
         A_var  = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)    

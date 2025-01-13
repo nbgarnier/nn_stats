@@ -70,7 +70,7 @@ Their .shape[1] is simply the number of available points, which should be the sa
 
 - if there is just 1 observable, i.e., if values.shape[0] equals 1 (as in the example above), then the returned values "mean" and "var" have shape (k.size, loc_new.shape[1]) while the third returned value (R) has shape (1, loc_new.shape[1]).
 
-- if there are more than just 1 observable, i.e., if values.shape[0] is larger than 1 in the above example, then the returned values "mean" and "var" have shape (k.size, values.shape[0], loc_new.shape[1]) while the third returned value (R) has shape (values.shape[0], loc_new.shape[1]) (should be of shape = (1, loc_new.shape[1])).
+- if there are more than just 1 observable, i.e., if values.shape[0] is larger than 1 in the above example, then the returned values "mean" and "var" have shape (k.size, values.shape[0], loc_new.shape[1]) while the third returned value (R) has shape (1, loc_new.shape[1]) (i.e., the same shape as if just 1 observable was provided).
 
 
 # other remarks
