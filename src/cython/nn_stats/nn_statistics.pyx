@@ -76,6 +76,7 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
         
     if (nb_R>0):   
         if verbosity: print("fixed R computation", end=" ")
+        R      = R*R;
         nnn    = PNP.zeros((nb_R,npts_out), dtype=PNP.intc)
         A_mean = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
         A_var  = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)    

@@ -43,6 +43,10 @@ case "${host_os}" in
                 MEX_LDEXTENSION=[.mexmaci64]
                 MEX_DIRNAME=[maci64]
                 ;;
+            arm64*)
+                MEX_LDEXTENSION=[.mexmaca64]
+                MEX_DIRNAME=[maca64]
+                ;;
             aarch64*)
                 MEX_LDEXTENSION=[.mexmaca64]
                 MEX_DIRNAME=[maca64]
