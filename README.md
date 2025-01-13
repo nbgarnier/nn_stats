@@ -17,12 +17,12 @@ There is a single function, called **"compute_local_stats"**, which can be invok
   * by imposing a set of values of R (radii to consider)
 
  The function expects (these are mandatory):
-  * a set of initial locations in a n-dimensional space
-  * either a set of alues of k or a set of values of R 
+  * a set of initial locations (parameter "x") in a n-dimensional space
+  * either a set of alues of k (parameterr "k") or a set of values of R (parameter "R")
 
 The following parameters can also be provided:
-  * a set of observables values taken on the initial locations; by default, this set is empty
-  * a set of "destination" locations, where the statistics of observables will be computed; by default, these "destination" locations are the same as the "initial" locations.
+  * a set of observables values taken on the initial locations (parameter "A"); by default, this set is empty and no moments are computed.
+  * a set of "destination" locations (parameter "y") where the statistics of observables will be computed; by default, if you do not provide these "destination" locations, the "initial" locations will be used.
   
 There are examples in the examples/ subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
 <pre><code>
@@ -77,13 +77,12 @@ Their .shape[1] is simply the number of available points, which should be the sa
 
 # other remarks
 
- if you are just interested in the number of neighbors (given a fixed radius R) or the radius where the k-th neighbors lies, you can invoke the function "compute_local_stats" without providing any observable. This is for example done with:
-<pre><code>
-values    = np.zeros((0, locations.shape[1]))       # empty 2d-array of observables with the correct shape
- 
-mean, var, R = ns.compute_local_stats(locations, values, loc_new, k=k)   # imposed k -> returns R at new locations loc_new
-mean, var, k = ns.compute_local_stats(locations, values, loc_new, R=R)   # imposed R -> returns k at new locations loc_new
+ if you are just interested in the number of neighbors (given a fixed radius R) or in the radius where the k-th neighbors lies, you can invoke the function "compute_local_stats" without providing any observable. This is for example done with:
+<pre><code> 
+mean, var, R = ns.compute_local_stats(locations, y=loc_new, k=k)   # imposed k -> returns R at new locations loc_new
+mean, var, k = ns.compute_local_stats(locations, y=loc_new, R=R)   # imposed R -> returns k at new locations loc_new
 </code></pre>
+note that there are still 3 output variables, even in that case (mean and var should be empty).
 
 # notes
 this is still under development, but has been tested OK in most common situations (with 1 observable only though).
