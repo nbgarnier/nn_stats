@@ -54,6 +54,12 @@ k = np.array([5, 10, 15], dtype=np.intc)    # a nd-array, as expected
 mean, var, R = ns.compute_local_stats(locations, values, loc_new, k=k)   # works OK
 </code></pre>
 
+- parameter k (if used) is expected of type "intc". You can set it to be this way like this:
+<pre><code>
+k = [5, 10, 15]                 # a Python list, easy to read
+k = np.array(k, dtype=np.intc)  # a NumPy array, of type "intc"
+</code></pre>
+
 - parameters k and R are expected to be sorted, i.e., their values must be increasing with the index: 
 <pre><code>
 k[i-1] <= k[i] # True for any valid index 1 <= i < size(k) 
