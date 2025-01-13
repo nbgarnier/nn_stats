@@ -79,8 +79,8 @@ nn_module = Extension(
                 )
           
 setup(name = 'nn_stats',
-      version = '0.5.0', 
-#      date ='2024-12-18',
+      version = '0.5.3', 
+#      date ='2025.01.13',
       description = "nearest neighbors local estimates",
       author      = "Nicolas B. Garnier",
       author_email= "nicolas.garnier@ens-lyon.fr",
@@ -89,6 +89,5 @@ setup(name = 'nn_stats',
 #	  cmdclass = {'build_ext': build_ext},
 #	  ext_package = 'nn_stats',
 	  ext_modules = cythonize([nn_module], annotate=DO_ANNOTATE)#, compiler_directives={'embedsignature': True}), 
-#	  packages = ['entropy']
 	)
 
