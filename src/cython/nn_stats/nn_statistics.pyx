@@ -16,29 +16,37 @@ include "commons.pyx"   # for basic library manipulation
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y, 
-                            int[::1] k=PNP.zeros(shape=(1),dtype=PNP.intc), 
-                            double[::1] R=PNP.zeros(shape=(1),dtype=PNP.float64), verbosity=get_verbosity()):
+def compute_local_stats( double[:, ::1] x, 
+                            double[:, ::1]  A = PNP.zeros(shape=(0,0),dtype=PNP.float64), 
+                            double [:, ::1] y = PNP.zeros(shape=(0,0),dtype=PNP.float64), 
+                            int[::1]        k = PNP.zeros(shape=(1),dtype=PNP.intc), 
+                            double[::1]     R = PNP.zeros(shape=(1),dtype=PNP.float64), verbosity=get_verbosity()):
     """     
     compute local averages (and corresponding stds) of observables A (possibly multi-dimensional)
     given at locations x (usually 2-dimensional).
     
     The averages are computed at new locations y, using either:
-    - the k-nn with prescribed k,
+    - the k-nearest neighbors with prescribed k,
     - all points in a ball of radius R, with prescribed R.
     
-    :param x: initial locations/positions (NumPy array with ndim=2, all coordinates along 1st dimension)
+    :param x: initial locations/positions (NumPy array with ndim=2, all coordinates along 1st dimension).
     :param A: observables (NumPy array with ndim=2) 
-    :param y: locations/positions (NumPy array with ndim=2, all coordinates along 1st dimension) where statistics will be computed.
+                If this parameter is not provided, no local average will be computed, but the distances (for fixed R)
+                or the numbers of neighbors (for fixed k) will be returned.
+    :param y: locations/positions (NumPy array with ndim=2, all coordinates along 1st dimension) where statistics will be computed. 
+                If this parameter is not provided, the initial locations/positions will be used.
     :param k: 1d-array (int) of number of neighbors to consider for a fixed-k computation.
     :param R: 1d-array of radii to consider for a fixed-radius computation.
-    :param verbosity: 0 to operate quietly without any message or larger value for more message (default value can be set by function "set_verbosity")
+    :param verbosity: 0 to operate quietly without any message or larger value for more message 
+                (default value can be set by function "set_verbosity")
                  
     :returns: the local averages of A over y, using either fixed-k or fixed-R.
     """
     
-    cdef int npts_in =x.shape[1], nx=x.shape[0], ratou # 2018-04-13: carefull with ordering of dimensions!
+    cdef int npts_in =x.shape[1], nx=x.shape[0], ratou  # 2018-04-13: carefull with ordering of dimensions!
+    if (A.shape[0]==0): A=PNP.zeros( (0, npts_in))       # 2025-01-13: if A is not provided, we set it to appropriate shape
     cdef int npts_A  =A.shape[1], nA=A.shape[0]
+    if (y.shape[0]==0): y=x.copy()                      # 2025-01-13: if destination locations are not provided, we use initial locations
     cdef int npts_out=y.shape[1], ny=y.shape[0]
     cdef int nb_k    =k.size
     cdef int nb_R    =R.size

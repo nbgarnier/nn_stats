@@ -77,7 +77,7 @@ Their .shape[1] is simply the number of available points, which should be the sa
 
  if you are just interested in the number of neighbors (given a fixed radius R) or the radius where the k-th neighbors lies, you can invoke the function "compute_local_stats" without providing any observable. This is for example done with:
 <pre><code>
-values    = np.random.randn(0, locations.shape[1])        # empty 2d-array of observables
+values    = np.zeros((0, locations.shape[1]))       # empty 2d-array of observables with the correct shape
  
 mean, var, R = ns.compute_local_stats(locations, values, loc_new, k=k)   # imposed k -> returns R at new locations loc_new
 mean, var, k = ns.compute_local_stats(locations, values, loc_new, R=R)   # imposed R -> returns k at new locations loc_new
