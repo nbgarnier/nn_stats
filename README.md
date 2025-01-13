@@ -82,7 +82,9 @@ Their .shape[1] is simply the number of available points, which should be the sa
 mean, var, R = ns.compute_local_stats(locations, y=loc_new, k=k)   # imposed k -> returns R at new locations loc_new
 mean, var, k = ns.compute_local_stats(locations, y=loc_new, R=R)   # imposed R -> returns k at new locations loc_new
 </code></pre>
-note that there are still 3 output variables, even in that case (mean and var should be empty).
+Note that in thaat case, if you want to provide a set of "destination" locations, you have to explicitly prefix them with "y=". If you do not do so, the function will expect its second parameter to be the observables, but they would be the "destination" locations.
+
+Note that there are still 3 output variables, even in that case (mean and var should be empty).
 
 # notes
 this is still under development, but has been tested OK in most common situations (with 1 observable only though).
