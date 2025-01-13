@@ -102,7 +102,7 @@ ANN_stats.o : $(BASE_DIR)/include/ANN/ANN.h $(BASE_DIR)/lib/libANN.a ANN_stats.c
 #####################################################################
 python : $(LIB_DIR)/libANN.a $(LIB_DIR)/libnn_stats.a
 #	cd cython; CC=$(CC) $(PYTHON) setup.py install --user; cd ..
-	cd cython; CC=$(CC) pip install .; cd ..
+	cd cython; CC=$(CC); BUILD_DIR=$(BUILD_DIR); pip install .; cd ..
 
 cython : $(LIB_DIR)/libANN.a $(LIB_DIR)/libnn_stats.a cython/nn_stats/nn_statistics.pyx cython/setup.py
 	echo "building from" $(BUILD_DIR)

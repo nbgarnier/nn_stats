@@ -90,7 +90,6 @@ def compute_local_stats( double[:, ::1] x, double[:, ::1] A, double [:, ::1] y,
         
 
 
-
 def set_nn_max(int k=nn_statistics.k_default):
     """
     sets the maximal value of allowed number of nearest neighbors
