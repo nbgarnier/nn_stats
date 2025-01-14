@@ -22,7 +22,7 @@ def compute_local_stats( double[:, ::1] x,
                             int[::1]        k = PNP.zeros(shape=(1),dtype=PNP.intc), 
                             double[::1]     R = PNP.zeros(shape=(1),dtype=PNP.float64), 
                             int             order_max = 2,
-                            int             verbosity = get_verbosity()):
+                            int             verbosity = get_verbosity(0)):
     """     
     compute local averages (and corresponding stds) of observables A (possibly multi-dimensional)
     given at locations x (usually 2-dimensional).
@@ -40,13 +40,14 @@ def compute_local_stats( double[:, ::1] x,
     :param k: 1d-array (int) of number of neighbors to consider for a fixed-k computation.
     :param R: 1d-array of radii to consider for a fixed-radius computation.
     :param order_max: maximal order of the moments to be computed (default=2)
+    :param centered: 
     :param verbosity: 0 to operate quietly without any message or larger value for more message 
                 (default value can be set by function "set_verbosity")
                  
     :returns: the local averages of A over y, using either fixed-k or fixed-R.
     """
     
-    cdef int npts_in =x.shape[1], nx=x.shape[0], ratou  # 2018-04-13: carefull with ordering of dimensions!
+    cdef int npts_in =x.shape[1], nx=x.shape[0], i, ratou  # 2018-04-13: carefull with ordering of dimensions!
     if (A.shape[0]==0): A=PNP.zeros( (0, npts_in))      # 2025-01-13: if A is not provided, we set it to appropriate shape
     cdef int npts_A  =A.shape[1], nA=A.shape[0]
     if (y.shape[0]==0): y=x.copy()                      # 2025-01-13: if destination locations are not provided, we use initial locations
@@ -77,15 +78,15 @@ def compute_local_stats( double[:, ::1] x,
         if verbosity: print("fixed k computation", end=" ")
         dists   = PNP.zeros((nb_k,npts_out), dtype=PNP.float64) 
         moments = PNP.zeros((order_max*nb_k*nA,npts_out), dtype=PNP.float64)
-#        A_var  = PNP.zeros((nb_k*nA,npts_out), dtype=PNP.float64) 
         if (nb_k==1):
             if verbosity: print("1 value of k :", k[0])
-            ratou  = nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &moments[0,0], order_max, &dists[0,0])
-            return  PNP.asarray(moments).reshape(order_max, nA, npts_out), PNP.sqrt(PNP.asarray(dists))
+            nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &moments[0,0], order_max, &dists[0,0])
+            mom = PNP.asarray(moments).reshape(order_max, nA, npts_out)
         else:
             if verbosity: print("multiple values of k :", PNP.array(k))
-            ratou  = nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &moments[0,0], order_max, &dists[0,0])
-            return(PNP.asarray(moments).reshape(order_max, nb_k, nA, npts_out), PNP.sqrt(PNP.asarray(dists)) )
+            nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &moments[0,0], order_max, &dists[0,0])
+            mom = PNP.asarray(moments).reshape(order_max, nb_k, nA, npts_out)
+        ret = [PNP.sqrt(PNP.asarray(dists)) ]           # we return the distances
         
     if (nb_R>0):   
         if verbosity: print("fixed R computation", end=" ")
@@ -95,13 +96,17 @@ def compute_local_stats( double[:, ::1] x,
 #        A_mean = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
 #        A_var  = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)    
         if (nb_R==1):
-            if verbosity: print("1 value of R :", R[0]) 
-            ratou = nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &moments[0,0], order_max, &nnn[0,0])
-            return  PNP.asarray(moments).reshape(order_max, nA, npts_out), PNP.asarray(nnn)
+            if verbosity: print("1 value of R^2 :", R[0]) 
+            nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &moments[0,0], order_max, &nnn[0,0])
+            mom = PNP.asarray(moments).reshape(order_max, nA, npts_out)
         else:
-            if verbosity: print("multiple values of R :", PNP.array(R))
-            ratou = nn_statistics.compute_stats_multi_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &R[0], nb_R, &moments[0,0], order_max, &nnn[0,0])
-            return(PNP.asarray(moments).reshape(order_max, nb_R, nA, npts_out), PNP.asarray(nnn) )
+            if verbosity: print("multiple values of R^2 :", PNP.array(R))
+            nn_statistics.compute_stats_multi_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &R[0], nb_R, &moments[0,0], order_max, &nnn[0,0])
+            mom = PNP.asarray(moments).reshape(order_max, nb_R, nA, npts_out)
+        ret = [ PNP.asarray(nnn) ]                      # we return the nb of neighbors
+            
+    for i in range(mom.shape[0]): ret.append(mom[i])    # we append all required moments
+    return ret
         
 
 

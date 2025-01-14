@@ -8,17 +8,6 @@
 
 # import definitions from C : 
 cdef extern from "library_commons.h":
-	struct dimension_parameters:
-		int nx;
-		int ny;
-		int npts;
-		int dim;
-	struct embedding_parameters:
-		int mx;
-		int my;
-		int stride_x;
-		int stride_y;
-		int lag;
 	void ANN_set_verbosity    (int level)	
 	
 

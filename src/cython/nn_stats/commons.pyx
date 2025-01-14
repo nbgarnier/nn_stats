@@ -22,12 +22,15 @@ def set_verbosity(int level=1):
     """
     commons.lib_verbosity=level
     
-def get_verbosity():
+def get_verbosity(verb=1):
     """
     gets the current verbosity level of the library
     
-    :param none:
-    :returns: no output values, but a message indicating the verbosity level is printed in the console.
+    :param verb: local verbosity of this very function:
+      - 0 for silent running; 
+      - 1 for printing the verbosity level in the console
+                 
+    :returns: the verbosity level.
     
     verbosity level explanation:
       - <0 : no messages, even if an error is encountered (not recommended!)
@@ -37,7 +40,7 @@ def get_verbosity():
       -  ...
         
     """
-    print("verbosity level", commons.lib_verbosity)
+    if (verb): print("verbosity level", commons.lib_verbosity)
     return(commons.lib_verbosity)
 
 
