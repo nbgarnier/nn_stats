@@ -85,6 +85,11 @@ t1=time()
 print("\telapsed time", time()-t1)
 P4.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists, marker='o')
 
+# playing with maximum nb of neighbors:
+print("max nb of neighbors for this dataset:", ns.get_nn_max())
+ns.set_nn_max(ns.get_nn_max()*2)
+print("max nb of neighbors changed to:", ns.get_nn_max())
+
 # multiple values of R:
 print("\nfixed R =", [R, 2*R, 3*R, 4*R], end=" ")
 t1=time()
@@ -95,6 +100,16 @@ P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[1,0,:]*nn[1,:], marker='
 P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[2]*nn[2], marker='o')
 P6.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[3]*nn[3], marker='o')
 print("output values of size", A_mean.shape, A_var.shape, "and", nn.shape)
+
+# playing with maximum nb of neighbors:
+print("max nb of neighbors for this dataset:", ns.get_nn_max())
+ns.set_nn_max(ns.get_nn_max()*2)
+print("max nb of neighbors changed to:", ns.get_nn_max())
+t1=time()
+[nn, A_mean, A_var] = ns.compute_local_stats(pos, val, y, R=np.array([R, 2*R, 3*R, 4*R]))
+print("\telapsed time", time()-t1)
+
+P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[2]*nn[2], marker='o')
 
 Fig.savefig("test_fixed_R.pdf")
 

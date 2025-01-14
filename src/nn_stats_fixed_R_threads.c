@@ -134,7 +134,7 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
     // 2022-12-13: all other threads number manipulation should be done outside of this engine function!
     npts_eff_min   = (npts_out - (npts_out%nb_cores))/nb_cores;  // nb pts mini dans chaque thread
     
-    tree_k_max = npts_in/10; // 2024-10-08, quick start, not optimized (memory)
+    if ((tree_k_max<1) || (tree_k_max>=npts_in)) tree_k_max = npts_in/10; // 2024-10-08, quick security, not optimized (memory)
 	init_ANN(npts_in, nx, tree_k_max, nb_cores); 	// pb with unknow k...
     create_kd_tree(x, npts_in, nx);
 
@@ -313,7 +313,7 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
     // 2022-12-13: all other threads number manipulation should be done outside of this engine function!
     npts_eff_min   = (npts_out - (npts_out%nb_cores))/nb_cores;  // nb pts mini dans chaque thread
     
-    tree_k_max = npts_in/10; // 2024-10-08, quick start, not optimized (memory)
+    if ((tree_k_max<1) || (tree_k_max>=npts_in)) tree_k_max = npts_in/10; // 2024-10-08, quick security, not optimized (memory)
 	init_ANN(npts_in, nx, tree_k_max, nb_cores); 	// pb with unknow k...
     create_kd_tree(x, npts_in, nx);
 
