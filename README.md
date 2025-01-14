@@ -42,8 +42,8 @@ loc_new   = np.random.randn(2, Npts_new)
 k=np.array([5, 10, 15], dtype=np.intc)    # multiple values of k
 R=np.array([0.5])                         # single value of R
 
-mean, var, R1 = ns.compute_local_stats(locations, values, loc_new, k=k)   # imposed k (indeed 3 values of k)
-mean, var, k1 = ns.compute_local_stats(locations, values, loc_new, R=R)   # imposed R (1 value of R)
+R1, mean, var = ns.compute_local_stats(locations, values, loc_new, k=k)   # imposed k (indeed 3 values of k)
+k1, mean, var = ns.compute_local_stats(locations, values, loc_new, R=R)   # imposed R (1 value of R)
 </code></pre>
 
 # important remarks
@@ -53,10 +53,10 @@ As the library is built for maximum efficiency (in both speed and memory usage),
 - all parameters for the function "compute_local_stats" are expected to be Numpy arrays. If you have a list, convert it first to a nd-array:
 <pre><code>
 k = [5, 10, 15]                             # a Python list, not efficient and will throw an exception
-mean, var, R = ns.compute_local_stats(locations, values, loc_new, k=k)   # throws an exception
+R, mean, var = ns.compute_local_stats(locations, values, loc_new, k=k)   # throws an exception
 
 k = np.array([5, 10, 15], dtype=np.intc)    # a nd-array, as expected
-mean, var, R = ns.compute_local_stats(locations, values, loc_new, k=k)   # works OK
+R, mean, var = ns.compute_local_stats(locations, values, loc_new, k=k)   # works OK
 </code></pre>
 
 - parameter k (if used) is expected of type "intc". You can set it to be this way like this:
@@ -85,10 +85,10 @@ Their .shape[1] is simply the number of available points, which should be the sa
 R, _, _ = ns.compute_local_stats(locations, y=loc_new, k=k)   # imposed k -> returns R at new locations loc_new
 k, _, _ = ns.compute_local_stats(locations, y=loc_new, R=R)   # imposed R -> returns k at new locations loc_new
 </code></pre>
-Note that in that case, if you want to provide a set of "destination" locations, you have to explicitly prefix them with "y=". If you do not do so, the function will expect its second parameter to be the observables, but they would be the "destination" locations.
+Note that in that case, if you want to provide a set of "destination" locations, you have to explicitly prefix them with "y=" as in the example code above. If you do not do so, the function will expect its second parameter to be the observables, while you provided "destination" locations.
 
-Note that there are still 3 output variables, even in that case (mean and var should be empty).
+Note that there are still 1+order_max output variables (so 3 by default), even in that case (mean and var should be empty).
 
 # notes
-this is still under development, but has been tested OK in most common situations (with 1 observable only though).
+This is still under development, but has been tested OK in most common situations. Open an issue if some trouble arises that puzzles you.
 
