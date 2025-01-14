@@ -47,7 +47,9 @@ def compute_local_stats(double[:, ::1] x,
     :param verbosity: 0 to operate quietly without any message or larger value for more messages
                 (default value can be set by function "set_verbosity")
                  
-    :returns: the local moments of A (central or not) computed at y, using either fixed-k or fixed-R.
+    :returns (1+order_max) variables: 
+        - the set of R if k is provided OR the set of k if R is provided
+        - the local moments of A (central or not) computed at y, using either fixed-k or fixed-R.
     """
     
     # analysing and formating input parameters
