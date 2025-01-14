@@ -25,7 +25,7 @@ The following parameters can also be provided:
   * a set of "destination" locations (parameter "y") where the statistics of observables will be computed. By default, if you do not provide these "destination" locations, the "initial" locations will be used.
   * a maximal order for moments computation (parameter "order_max"). Moments of order 1, 2, ..., order_max will be computed. By default, order_max=2. (new in v0.7.2)
   * a boolean (parameter "centered") to indicate central moments (True) or natural moments (False) are requested. By default, observables are not centered, and natural moments are returned. (new in v0.7.3)
-  * a maximal number of neighbors to consider when performing a fixed-radius search (parameter "nn_max") (this may slow down the library, do it at your own risk!). By default, the function search for at most x.shape[1]/10 neighbors, i.e., 10% of the available data. You can specify to search for more points with this parameter.
+  * a maximal number of neighbors to consider when performing a fixed-radius search (parameter "nn_max") (this may slow down the library, do it at your own risk!). By default, the function search for at most x.shape[1]/10 neighbors, i.e., 10% of the available data. You can specify to search for more points with this parameter. (new in v0.8.0)
   
 There are examples in the examples/ subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
 <pre><code>
