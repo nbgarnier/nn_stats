@@ -34,9 +34,6 @@ struct thread_args
 
 struct thread_output
     {   int n_eff;
-//        int n_errors;
-//        double mean;
-//        double var;
     };
 
 
@@ -123,8 +120,6 @@ int compute_stats_fixed_k_threads(double *x, double *A, int npts_in, int nx, int
     pos_out.Npts =npts_out; pos_out.dim =nx;    pos_out.A =y;
     obs_in.Npts  =npts_in;  obs_in.dim  =nA;    obs_in.A  =A;
     rad_out.Npts =npts_out; rad_out.dim =k;     rad_out.A =dists;       // note 2024-10-15: only one k (largest) is returned
-//    obs_mean.Npts=npts_out; obs_mean.dim=nA;    obs_mean.A=A_mean;
-//    obs_var.Npts =npts_out; obs_var.dim =nA;    obs_var.A =A_std;
     obs_moments.Npts =npts_out; obs_moments.dim =nA;    obs_moments.A =A_moments;
     
     for (core=0; core<nb_cores; core++)
@@ -238,8 +233,6 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
     obs_in.Npts  =npts_in;  obs_in.dim  =nA;    obs_in.A  =A;
     k_in_vec.N   =nk;       k_in_vec.ind_min=0;     k_in_vec.ind_max=nk;        k_in_vec.A = k;
     rad_out.Npts =npts_out; rad_out.dim =nk;    rad_out.A =dists;       // note 2024-10-29: all requested k are returned
-//    obs_mean.Npts=npts_out; obs_mean.dim=nA;    obs_mean.A=A_mean;
-//    obs_var.Npts =npts_out; obs_var.dim =nA;    obs_var.A =A_std;
     obs_moments.Npts =npts_out; obs_moments.dim =nA;    obs_moments.A =A_moments;
 
     for (core=0; core<nb_cores; core++)

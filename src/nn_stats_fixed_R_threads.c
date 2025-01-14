@@ -55,9 +55,7 @@ struct thread_output
 // first ones are already defined in "nn_stats_fixed_k_threads.c":
 extern array   pos_out;     // for the locations (examination locations)
 extern array   obs_in;      // for the observables at the initial locations
-// extern array   obs_mean;    // for the local average, on the outpout locations (output)
-// extern array   obs_var;     // for the lcoal variance, on the outpout locations (output)
-extern array obs_moments;  // 2025-01-13: for local moments of order 1, 2, ..., order_max, on the outpout locations (output)
+extern array obs_moments;   // 2025-01-13: for local moments of order 1, 2, ..., order_max, on the outpout locations (output)
 // last ones are specific to this file:
 array   R_in;               // for the nb of nn (input)
 arr_int nnn_out;            // for the nb of nn (output)
@@ -80,10 +78,9 @@ void *threaded_stats_fixed_R_func(void *ptr)
         order_max= args->order_max,
         do_center= args->do_center;
     double R     = args->R;
-    int n_eff    = i_end-i_start; // how many points in this thread
+    int    n_eff = i_end-i_start;   // how many points in this thread
     double ratou[2];
-
-    double queryPt[nx]; // to be optimized
+    double queryPt[nx];             // to be optimized ?
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
@@ -133,8 +130,7 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
 	int ret;
     
     if (nb_cores<1) set_cores_number(nb_cores); // auto-detect, if asked for
-    nb_cores=get_cores_number(GET_CORES_SELECTED);     
-    // nb_cores=1;       
+    nb_cores=get_cores_number(GET_CORES_SELECTED);          
     // 2022-12-13: all other threads number manipulation should be done outside of this engine function!
     npts_eff_min   = (npts_out - (npts_out%nb_cores))/nb_cores;  // nb pts mini dans chaque thread
     
@@ -150,8 +146,6 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
     pos_out.Npts =npts_out; pos_out.dim =nx;    pos_out.A =y;
     obs_in.Npts  =npts_in;  obs_in.dim  =nA;    obs_in.A  =A;
     nnn_out.Npts =npts_out; nnn_out.dim =1;     nnn_out.A =k;       // note 2024-10-15: only one nb (largest R) is returned
-//    obs_mean.Npts=npts_out; obs_mean.dim=nA;    obs_mean.A=A_mean;
-//    obs_var.Npts =npts_out; obs_var.dim =nA;    obs_var.A =A_std;
     obs_moments.Npts =npts_out; obs_moments.dim =nA;    obs_moments.A =A_moments;
     
     
@@ -315,8 +309,7 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
 	int ret;
     
     if (nb_cores<1) set_cores_number(nb_cores); // auto-detect, if asked for
-    nb_cores=get_cores_number(GET_CORES_SELECTED);     
- //   nb_cores=1;       
+    nb_cores=get_cores_number(GET_CORES_SELECTED);            
     // 2022-12-13: all other threads number manipulation should be done outside of this engine function!
     npts_eff_min   = (npts_out - (npts_out%nb_cores))/nb_cores;  // nb pts mini dans chaque thread
     
@@ -333,8 +326,6 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
     obs_in.Npts  =npts_in;  obs_in.dim  =nA;    obs_in.A  =A;
     R_in.Npts    =1;        R_in.dim    =nR;    R_in.A    =R;
     nnn_out.Npts =npts_out; nnn_out.dim =nR;    nnn_out.A =k;       // note 2024-12-16: all R results are returned
-//    obs_mean.Npts=npts_out; obs_mean.dim=nA;    obs_mean.A=A_mean;
-//    obs_var.Npts =npts_out; obs_var.dim =nA;    obs_var.A =A_std;
     obs_moments.Npts =npts_out; obs_moments.dim =nA;    obs_moments.A =A_moments;
     
     

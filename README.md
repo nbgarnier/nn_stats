@@ -24,7 +24,7 @@ The following parameters can also be provided:
   * a set of observables values taken on the initial locations (parameter "A"). By default, this set is empty and no moments are computed.
   * a set of "destination" locations (parameter "y") where the statistics of observables will be computed. By default, if you do not provide these "destination" locations, the "initial" locations will be used.
   * a maximal order for moments computation (parameter "order_max"). Moments of order 1, 2, ..., order_max will be computed. By default, order_max=2.
-  * a boolean (parameter "centered") to indicate if moments are for the centered (True) or non-centered (False) observables. By default, moments are not centered.
+  * a boolean (parameter "centered") to indicate central moments (True) or natural moments (False) are requested. By default, observables are not centered, and natural moments are returned.
   
 There are examples in the examples/ subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
 <pre><code>
@@ -81,8 +81,8 @@ Their .shape[1] is simply the number of available points, which should be the sa
 
  if you are just interested in the number of neighbors (given a fixed radius R) or in the radius where the k-th neighbors lies, you can invoke the function "compute_local_stats" without providing any observable. This is for example done with:
 <pre><code> 
-mean, var, R = ns.compute_local_stats(locations, y=loc_new, k=k)   # imposed k -> returns R at new locations loc_new
-mean, var, k = ns.compute_local_stats(locations, y=loc_new, R=R)   # imposed R -> returns k at new locations loc_new
+R, _, _ = ns.compute_local_stats(locations, y=loc_new, k=k)   # imposed k -> returns R at new locations loc_new
+k, _, _ = ns.compute_local_stats(locations, y=loc_new, R=R)   # imposed R -> returns k at new locations loc_new
 </code></pre>
 Note that in that case, if you want to provide a set of "destination" locations, you have to explicitly prefix them with "y=". If you do not do so, the function will expect its second parameter to be the observables, but they would be the "destination" locations.
 

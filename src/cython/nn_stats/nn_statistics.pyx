@@ -16,14 +16,14 @@ include "commons.pyx"   # for basic library manipulation
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def compute_local_stats( double[:, ::1] x, 
-                            double[:, ::1]  A = PNP.zeros(shape=(0,1),dtype=PNP.float64), 
-                            double [:, ::1] y = PNP.zeros(shape=(0,1),dtype=PNP.float64), 
-                            int[::1]        k = PNP.zeros(shape=(1),dtype=PNP.intc), 
-                            double[::1]     R = PNP.zeros(shape=(1),dtype=PNP.float64), 
-                            int             order_max = 2,
-                            bint            centered = False,
-                            int             verbosity = get_verbosity(0)):
+def compute_local_stats(double[:, ::1] x, 
+                        double[:, ::1]  A = PNP.zeros(shape=(0,1),dtype=PNP.float64), 
+                        double [:, ::1] y = PNP.zeros(shape=(0,1),dtype=PNP.float64), 
+                        int[::1]        k = PNP.zeros(shape=(1),dtype=PNP.intc), 
+                        double[::1]     R = PNP.zeros(shape=(1),dtype=PNP.float64), 
+                        int             order_max = 2,
+                        bint            centered = False,
+                        int             verbosity = -1):
     """     
     compute local averages (and corresponding stds) of observables A (possibly multi-dimensional)
     given at locations x (usually 2-dimensional).
@@ -42,19 +42,34 @@ def compute_local_stats( double[:, ::1] x,
     :param R: 1d-array of radii to consider for a fixed-radius computation.
     :param order_max: maximal order of the moments to be computed (default=2)
     :param centered: Boolean to indicate if moments are centered (True) or not centered (False) (default=False)
-    :param verbosity: 0 to operate quietly without any message or larger value for more message 
+    :param verbosity: 0 to operate quietly without any message or larger value for more messages
                 (default value can be set by function "set_verbosity")
                  
     :returns: the local moments of A (central or not) computed at y, using either fixed-k or fixed-R.
     """
     
+    # analysing and formating input parameters
     cdef int npts_in =x.shape[1], nx=x.shape[0], i, ratou  # 2018-04-13: carefull with ordering of dimensions!
-    if (A.shape[0]==0): A=PNP.zeros( (0, npts_in))      # 2025-01-13: if A is not provided, we set it to appropriate shape
+    if (A.shape[0]==0): 
+        if (verbosity>1): print("A was not provided, shape", A.shape, end=' ')
+        A=PNP.zeros( (0, npts_in))      # 2025-01-13: if A is not provided, we set it to appropriate shape
+        if (verbosity>1): print(" -> new shape", A.shape)
     cdef int npts_A  =A.shape[1], nA=A.shape[0]
-    if (y.shape[0]==0): y=x.copy()                      # 2025-01-13: if destination locations are not provided, we use initial locations
+    if (y.shape[0]==0): 
+        if (verbosity>1): print("y was not provided, shape", y.shape, end=' ')
+        y=x.copy()                      # 2025-01-13: if destination locations are not provided, we use initial locations
+        if (verbosity>1): print(" -> new shape", y.shape)
     cdef int npts_out=y.shape[1], ny=y.shape[0]
     cdef int nb_k    =k.size
     cdef int nb_R    =R.size
+    cdef CNP.ndarray[dtype=double, ndim=1, mode='c'] R2     # squared radii
+
+    if (verbosity>2):   print("function called with verbosity", verbosity, end=' ')
+    if (verbosity==-1): verbosity=get_verbosity(0)
+    if (verbosity>2):   print("so using verbosity", verbosity)
+    
+    if (verbosity>1): 
+        print("k has shape", k.shape, "and R has shape", R.shape, "\t-> nb_k", nb_k, "  nb_R", nb_R)
     
     cdef CNP.ndarray[dtype=double, ndim=2, mode='c'] dists  #= void;
     cdef CNP.ndarray[dtype=int,    ndim=2, mode='c'] nnn
@@ -87,24 +102,23 @@ def compute_local_stats( double[:, ::1] x,
             if verbosity: print("multiple values of k :", PNP.array(k))
             nn_statistics.compute_stats_multi_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &k[0], nb_k, &moments[0,0], order_max, centered, &dists[0,0])
             mom = PNP.asarray(moments).reshape(order_max, nb_k, nA, npts_out)
-        ret = [PNP.sqrt(PNP.asarray(dists)) ]           # we return the distances
+        ret = [PNP.sqrt(PNP.asarray(dists))]           # we return the distances
         
-    if (nb_R>0):   
+    elif (R[0]>0):   
         if verbosity: print("fixed R computation", end=" ")
-        for ratou in range(nb_R): R[ratou]=R[ratou]**2 # internal code expects squared distances
+        R2      = PNP.zeros(nb_R, dtype=PNP.float64)
+        for ratou in range(nb_R): R2[ratou]=R[ratou]**2  # internal code expects squared distances
         nnn     = PNP.zeros((nb_R,npts_out), dtype=PNP.intc)
         moments = PNP.zeros((order_max*nb_R*nA,npts_out), dtype=PNP.float64)
-#        A_mean = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)
-#        A_var  = PNP.zeros((nb_R*nA,npts_out), dtype=PNP.float64)    
         if (nb_R==1):
             if verbosity: print("1 value of R^2 :", R[0]) 
-            nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R[0], &moments[0,0], order_max, centered, &nnn[0,0])
+            nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R2[0], &moments[0,0], order_max, centered, &nnn[0,0])
             mom = PNP.asarray(moments).reshape(order_max, nA, npts_out)
         else:
             if verbosity: print("multiple values of R^2 :", PNP.array(R))
-            nn_statistics.compute_stats_multi_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &R[0], nb_R, &moments[0,0], order_max, centered, &nnn[0,0])
+            nn_statistics.compute_stats_multi_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &R2[0], nb_R, &moments[0,0], order_max, centered, &nnn[0,0])
             mom = PNP.asarray(moments).reshape(order_max, nb_R, nA, npts_out)
-        ret = [ PNP.asarray(nnn) ]                      # we return the nb of neighbors
+        ret = [PNP.asarray(nnn)]                      # we return the nb of neighbors
             
     for i in range(mom.shape[0]): ret.append(mom[i])    # we append all required moments
     return ret

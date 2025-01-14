@@ -81,14 +81,14 @@ P1.scatter(pos[0], pos[1], marker='.', edgecolor='b', facecolor='none', alpha=0.
 # single value of k (for comparison):
 print("\nfixed k =", k, end=" ")
 t1=time()
-[A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=np.array([k], dtype=np.intc))
+[dists, A_mean, A_var] = ns.compute_local_stats(pos, val, y, k=np.array([k], dtype=np.intc))
 print("\telapsed time", time()-t1)
 P4.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists, marker='o')
 
 # multiple values of R:
 print("\nfixed R =", [R, 2*R, 3*R, 4*R], end=" ")
 t1=time()
-[A_mean, A_var, nn] = ns.compute_local_stats(pos, val, y, R=np.array([R, 2*R, 3*R, 4*R]))
+[nn, A_mean, A_var] = ns.compute_local_stats(pos, val, y, R=np.array([R, 2*R, 3*R, 4*R]))
 print("\telapsed time", time()-t1)
 P2.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[0,0,:]*nn[0,:], marker='o')
 P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[1,0,:]*nn[1,:], marker='o')
@@ -98,3 +98,5 @@ print("output values of size", A_mean.shape, A_var.shape, "and", nn.shape)
 
 Fig.savefig("test_fixed_R.pdf")
 
+print(np.min(A_mean[3]), np.min(nn[3]))
+print(np.max(A_mean[3]), np.max(nn[3]))

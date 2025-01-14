@@ -70,7 +70,7 @@ int *get_binomial(int order)
 /* npts_out  : nb of points in the output                                              */
 /* nA        : nb of observables                                                       */
 /* order_max : maximal order of moments to be computed                                 */
-/* do_center : centered moments if ==1, or not-centered moments if ==0                 */
+/* do_center : central moments if ==1, or not-centered moments if ==0                  */
 /* core      : which core to run on                                                    */
 /* output parameters:                                                                  */
 /* R         : distance of the k-nn from x                                             */

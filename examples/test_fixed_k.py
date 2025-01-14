@@ -30,11 +30,14 @@ Npts    = 500
 ndim    = 1
 sigma_x = 1
 
+verbosity=0
+
 # here, we can play with nb of cores:
 #ns.multithreading(1)       # single core
 ns.multithreading("auto")   # max cores
 ns.multithreading("info")   # prints informations
-ns.set_verbosity(1)         # set default verbosity to 1, to have some little messages
+ns.set_verbosity(verbosity)         # set default verbosity to 1, to have some little messages
+ns.get_verbosity()
 
 radius  = 5.   # for inital points and output grid
 
@@ -80,27 +83,27 @@ P1.scatter(pos[0], pos[1], marker='.', edgecolor='b', facecolor='none', alpha=0.
 # single value of k:
 print("\nfixed k =", 4*k, end=" ")
 t1=time()
-[A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=np.array([4*k], dtype=np.intc))
+[dists, A_mean, A_var] = ns.compute_local_stats(pos, val, y, k=np.array([4*k], dtype=np.intc))
 print("\telapsed time", time()-t1)
-print("shape of output variables: A_mean and A_var:", A_mean.shape, A_var.shape, "and distances:", dists.shape)
+if (verbosity>0): print("shape of output variables: A_mean and A_var:", A_mean.shape, A_var.shape, "and distances:", dists.shape)
 P6.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean/dists, marker='o')
 
 # multiple values of k:
 print("\nfixed k =", [k, 2*k, 3*k, 4*k], end=" ")
 t1=time()
-[A_mean, A_var, dists] = ns.compute_local_stats(pos, val, y, k=np.array([k, 2*k, 3*k, 4*k], dtype=np.intc))
+[dists, A_mean, A_var] = ns.compute_local_stats(pos, val, y, k=np.array([k, 2*k, 3*k, 4*k], dtype=np.intc))
 print("\telapsed time", time()-t1)
+if (verbosity>0): print("shape of output variables: A_mean and A_var:", A_mean.shape, A_var.shape, "and distances:", dists.shape)
 P2.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[0]/dists[0], marker='o')
 P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[1]/dists[1], marker='o')
 P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[2]/dists[2], marker='o')
-print("shape of output variables: A_mean and A_var:", A_mean.shape, A_var.shape, "and distances:", dists.shape)
 
 # single value of R (see other example for various R and comparison)
 print("\nfixed R =", R, end=" ")
 t1=time()
-A_mean, A_var, nnn = ns.compute_local_stats(pos, val, y, R=np.array([R]))
+nnn, A_mean, A_var = ns.compute_local_stats(pos, val, y, R=np.array([R]))
 print("\telapsed time", time()-t1)
-print("shape of output variables: A_mean and A_var:", A_mean.shape, A_var.shape, "and nb of neighbors:", nnn.shape)
+if (verbosity>0): print("shape of output variables: A_mean and A_var:", A_mean.shape, A_var.shape, "and nb of neighbors:", nnn.shape)
 P4.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean*nnn, marker='o')
 
 

@@ -28,10 +28,11 @@ int tree_k_max=5;
 /****************************************************************************************/
 /* selects the verbosity level                                                          */
 /****************************************************************************************/
-void ANN_set_verbosity(int level)
+/*void ANN_set_verbosity(int level)
 {   lib_verbosity=level;
     return;
 }
+*/
 
 
 int is_equal(double x, double y)
