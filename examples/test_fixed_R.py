@@ -101,17 +101,19 @@ P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[2]*nn[2], marker='o')
 P6.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[3]*nn[3], marker='o')
 print("output values of size", A_mean.shape, A_var.shape, "and", nn.shape)
 
-# playing with maximum nb of neighbors:
-print("max nb of neighbors for this dataset:", ns.get_nn_max())
-ns.set_nn_max(ns.get_nn_max()*2)
-print("max nb of neighbors changed to:", ns.get_nn_max())
-t1=time()
-[nn, A_mean, A_var] = ns.compute_local_stats(pos, val, y, R=np.array([R, 2*R, 3*R, 4*R]))
-print("\telapsed time", time()-t1)
-
-P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[2]*nn[2], marker='o')
-
 Fig.savefig("test_fixed_R.pdf")
 
-print(np.min(A_mean[3]), np.min(nn[3]))
-print(np.max(A_mean[3]), np.max(nn[3]))
+
+# playing with maximum nb of neighbors:
+print("max nb of neighbors for this dataset was (10%):", ns.get_nn_max())
+t1=time()
+[nn, A_mean, A_var] = ns.compute_local_stats(pos, val, y, R=np.array([R, 2*R, 3*R, 4*R]), nn_max=Npts/2)
+print("\telapsed time", time()-t1)
+print("max nb of neighbors changed to (50%):", ns.get_nn_max())
+
+P2.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[0,0,:]*nn[0,:], marker='o')
+P3.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[1,0,:]*nn[1,:], marker='o')
+P5.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[2]*nn[2], marker='o')
+P6.scatter(y[0,:].flatten(), y[1,:].flatten(), c=A_mean[3]*nn[3], marker='o')
+
+Fig.savefig("test_fixed_R_more_pts.pdf")

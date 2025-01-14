@@ -23,7 +23,7 @@ def compute_local_stats(double[:, ::1] x,
                         double[::1]     R = PNP.zeros(shape=(1),dtype=PNP.float64), 
                         int             order_max = 2,
                         bint            centered = False,
-                        int             nn_max = -1,
+                        int             nn_max = -1, 
                         int             verbosity = -1):
     """     
     compute local averages (and corresponding stds) of observables A (possibly multi-dimensional)
