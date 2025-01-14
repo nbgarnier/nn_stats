@@ -42,6 +42,7 @@ struct thread_args
         int nx;         // dimensionality of location data
         int nA;         // dimensionality of observables
         int order_max;  // maximum order of moments to be computed
+        int do_center;  // for central moments or moments from the origin
         double R;       // radius of ball
     };
 
@@ -76,7 +77,8 @@ void *threaded_stats_fixed_R_func(void *ptr)
         i_end    = args->i_end,
         nx       = args->nx,
         nA       = args->nA,
-        order_max= args->order_max;
+        order_max= args->order_max,
+        do_center= args->do_center;
     double R     = args->R;
     int n_eff    = i_end-i_start; // how many points in this thread
     double ratou[2];
@@ -94,7 +96,7 @@ void *threaded_stats_fixed_R_func(void *ptr)
                 (obs_moments.A+i)[obs_moments.Npts*(nA*j_moment + d)] = my_NAN;
                 
         }
-        else ANN_compute_stats_single_k(queryPt, obs_in.A, k, ratou, obs_moments.A + i, order_max, obs_moments.Npts, nA, core);
+        else ANN_compute_stats_single_k(queryPt, obs_in.A, k, ratou, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
 //        printf("R = %1.2f (input) vs %1.2f (out)\n", R, ratou[0]);
     }
     
@@ -124,7 +126,7 @@ void *threaded_stats_fixed_R_func(void *ptr)
 /* 2012-02-27  fork from "compute_entropy_ann"                                          */
 /* 2021-11-26  first multi-threads version                                              */
 /****************************************************************************************/
-int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, double R, double *A_moments, int order_max, int *k)
+int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, double R, double *A_moments, int order_max, int do_center, int *k)
 {	register int core, nb_cores=get_cores_number(GET_CORES_SELECTED);
     int npts_eff_min;
 	int n_total=0; // just for sanity check
@@ -161,6 +163,7 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
         my_arguments[core].nx       = nx;
         my_arguments[core].nA       = nA;
         my_arguments[core].order_max= order_max;
+        my_arguments[core].do_center= do_center;
         my_arguments[core].R        = R;
         ret=pthread_create(&thread[core], NULL, threaded_stats_fixed_R_func, (void *)&my_arguments[core]);
         if (ret!=0)
@@ -199,7 +202,8 @@ void *threaded_stats_multi_R_func(void *ptr)
         i_end    = args->i_end,
         nx       = args->nx,
         nA       = args->nA,
-        order_max= args->order_max;
+        order_max= args->order_max,
+        do_center= args->do_center;
     int n_eff    = i_end-i_start;   // how many points in this thread
     k_vector    k_vec;
 
@@ -245,7 +249,7 @@ void *threaded_stats_multi_R_func(void *ptr)
         if ( (ind_k_min<R_in.dim) && (ind_k_min<ind_k_max) )
         {   k_vec.ind_min = ind_k_min;
             k_vec.ind_max = ind_k_max;
-            ANN_compute_stats_multi_k(queryPt, obs_in.A, k_vec, NULL, obs_moments.A+i, order_max, obs_moments.Npts, nA, core);
+            ANN_compute_stats_multi_k(queryPt, obs_in.A, k_vec, NULL, obs_moments.A+i, order_max, obs_moments.Npts, nA, do_center, core);
 #ifdef DEBUG
             printf("OK");
 #endif
@@ -304,7 +308,7 @@ void *threaded_stats_multi_R_func(void *ptr)
 /* 2012-02-27  fork from "compute_entropy_ann"                                          */
 /* 2021-11-26  first multi-threads version                                              */
 /****************************************************************************************/
-int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, double *R, int nR, double *A_moments, int order_max, int *k)
+int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, double *R, int nR, double *A_moments, int order_max, int do_center, int *k)
 {	register int core, nb_cores=get_cores_number(GET_CORES_SELECTED);
     int npts_eff_min;
 	int n_total=0; // just for sanity check
@@ -342,6 +346,7 @@ int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int
         my_arguments[core].nx        = nx;
         my_arguments[core].nA        = nA;
         my_arguments[core].order_max = order_max;
+        my_arguments[core].do_center = do_center;
         ret=pthread_create(&thread[core], NULL, threaded_stats_multi_R_func, (void *)&my_arguments[core]);
         if (ret!=0)
         {   printf("[compute_stats_multi_R_threads] TROUBLE! couldn't create thread!\n");

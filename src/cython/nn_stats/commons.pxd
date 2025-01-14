@@ -8,7 +8,7 @@
 
 # import definitions from C : 
 cdef extern from "library_commons.h":
-	void ANN_set_verbosity    (int level)	
+	void ANN_set_verbosity    		(int level)	
 	
 
 cdef extern from "verbosity.h":

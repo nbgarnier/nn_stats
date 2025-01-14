@@ -6,8 +6,8 @@ requires = ["setuptools", "wheel", "Cython", "numpy"]  # PEP 508 specifications.
 
 [project]
 name = "nn_stats"
-version = "0.7.1" 
-description = "nearest neighboors estimates of local averages"
+version = "0.7.3" 
+description = "nearest neighbors estimates of local averages"
 # readme = "README.rst"
 authors = [{name = "Nicolas B. Garnier", email = "nicolas.garnier@ens-lyon.fr"}]
 maintainers = [{name = "Nicolas B. Garnier", email = "nicolas.garnier@ens-lyon.fr"}]

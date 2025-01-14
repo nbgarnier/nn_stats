@@ -1,7 +1,7 @@
 Metadata-Version: 2.2
 Name: nn_stats
-Version: 0.7.1
-Summary: nearest neighboors estimates of local averages
+Version: 0.7.2
+Summary: nearest neighbors estimates of local averages
 Author: Nicolas B. Garnier
 Author-email: "Nicolas B. Garnier" <nicolas.garnier@ens-lyon.fr>
 Maintainer-email: "Nicolas B. Garnier" <nicolas.garnier@ens-lyon.fr>

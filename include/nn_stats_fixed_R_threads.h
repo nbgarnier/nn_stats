@@ -7,7 +7,7 @@
 /* Nicolas Garnier	nicolas.garnier@ens-lyon.fr			                */
 /************************************************************************/
 
-int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, double R,          double *A_moments, int order_max, int *k);
+int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, double R,          double *A_moments, int order_max, int do_center, int *k);
 
-int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, double *R, int nR, double *A_moments, int order_max, int *k);
+int compute_stats_multi_R_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, double *R, int nR, double *A_moments, int order_max, int do_center, int *k);
 

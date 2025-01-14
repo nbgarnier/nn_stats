@@ -28,6 +28,7 @@ struct thread_args
         int nx;         // dimensionality of location data
         int nA;         // dimensionality of observables
         int order_max;  // maximum order of moments to be computed
+        int do_center;  // for central moments or moments from the origin
         int k;          // nb of neighbors to search for
     };
 
@@ -64,13 +65,14 @@ void *threaded_stats_fixed_k_func(void *ptr)
         nA       = args->nA,
         k        = args->k,
         order_max= args->order_max,
+        do_center= args->do_center,
         n_eff    = i_end-i_start; // how many points in this thread
 
     double queryPt[nx]; // to be optimized
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
-        ANN_compute_stats_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, core);
+        ANN_compute_stats_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
     }
     
     out->n_eff    = n_eff;
@@ -100,7 +102,7 @@ void *threaded_stats_fixed_k_func(void *ptr)
 /*                                                                                      */
 /* 2024-10-07  fork from "compute_entropy_ann_threads", no output yet                   */
 /****************************************************************************************/
-int compute_stats_fixed_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int k, double *A_moments, int order_max, double *dists)
+int compute_stats_fixed_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int k, double *A_moments, int order_max, int do_center, double *dists)
 {	register int core, nb_cores=get_cores_number(GET_CORES_SELECTED), npts_eff_min;
 	int n_total=0; // just for sanity check
 	int ret;
@@ -133,6 +135,7 @@ int compute_stats_fixed_k_threads(double *x, double *A, int npts_in, int nx, int
         my_arguments[core].nx       = nx;
         my_arguments[core].nA       = nA;
         my_arguments[core].order_max= order_max;
+        my_arguments[core].do_center= do_center;
         my_arguments[core].k        = k;
         ret=pthread_create(&thread[core], NULL, threaded_stats_fixed_k_func, (void *)&my_arguments[core]);
         if (ret!=0)
@@ -171,13 +174,14 @@ void *threaded_stats_multi_k_func(void *ptr)
         nx       = args->nx,
         nA       = args->nA,
         order_max= args->order_max,
+        do_center= args->do_center,
         n_eff    = i_end-i_start; // how many points in this thread
 
     double queryPt[nx]; // to be optimized
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
-        ANN_compute_stats_multi_k(queryPt, obs_in.A, k_in_vec, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, core);
+        ANN_compute_stats_multi_k(queryPt, obs_in.A, k_in_vec, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
 //        printf("%1.0f %1.0f -> %1.2f\n", pos_out.A[i], pos_out.A[i+pos_out.Npts], rad);
     }
     
@@ -211,7 +215,7 @@ void *threaded_stats_multi_k_func(void *ptr)
 /*              var and mean (and larger order moments) will be saved in moments        */
 /*              order_max is the largest order of the moments to be computed            */
 /****************************************************************************************/
-int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int *k, int nk, double *A_moments, int order_max, double *dists)
+int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int *k, int nk, double *A_moments, int order_max, int do_center, double *dists)
 {	register int core, nb_cores=get_cores_number(GET_CORES_SELECTED), npts_eff_min;
 	int n_total=0; // just for sanity check
     int k_max=k[nk-1];
@@ -246,6 +250,7 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
         my_arguments[core].nx = nx;
         my_arguments[core].nA = nA;
         my_arguments[core].order_max = order_max;
+        my_arguments[core].do_center = do_center;
         ret=pthread_create(&thread[core], NULL, threaded_stats_multi_k_func, (void *)&my_arguments[core]);
         if (ret!=0)
         {   printf("[compute_stats_multi_k_threads] TROUBLE! couldn't create thread!\n");
