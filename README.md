@@ -80,14 +80,22 @@ Their .shape[1] is simply the number of available points, which should be the sa
 
 # other remarks
 
- if you are just interested in the number of neighbors (given a fixed radius R) or in the radius where the k-th neighbors lies, you can invoke the function "compute_local_stats" without providing any observable. This is for example done with:
+if you are just interested in the number of neighbors (given a fixed radius R) or in the radius where the k-th neighbors lies, you can invoke the function "compute_local_stats" in the following two different ways:
+ 
+* without providing any observable. This is for example done with:
 <pre><code> 
 R, _, _ = ns.compute_local_stats(locations, y=loc_new, k=k)   # imposed k -> returns R at new locations loc_new
 k, _, _ = ns.compute_local_stats(locations, y=loc_new, R=R)   # imposed R -> returns k at new locations loc_new
 </code></pre>
 Note that in that case, if you want to provide a set of "destination" locations, you have to explicitly prefix them with "y=" as in the example code above. If you do not do so, the function will expect its second parameter to be the observables, while you provided "destination" locations.
 
-Note that there are still 1+order_max output variables (so 3 by default), even in that case (mean and var should be empty).
+* imposing order_max=0. This is for example done with:
+<pre><code> 
+R = ns.compute_local_stats(locations, A=values, y=loc_new, k=k, order_max=0)   # imposed k -> returns R at new locations loc_new
+k = ns.compute_local_stats(locations, A=values, y=loc_new, R=R, order_max=0)   # imposed R -> returns k at new locations loc_new
+</code></pre>
+
+Note using the first way (and having a non-zero order_max) there will be (1+order_max) output variables (so 1+2=3 by default), which may be desirable depending on the style of your script, although returned moments variables should be empty. 
 
 # notes
 This is still under development, but has been tested OK in most common situations. Open an issue if some trouble arises that puzzles you.

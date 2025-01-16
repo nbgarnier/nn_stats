@@ -79,8 +79,8 @@ nn_module = Extension(
                 )
           
 setup(name = 'nn_stats',
-      version = '0.8.1', 
-#      date ='2025.01.14',
+      version = '0.8.2', 
+#      date ='2025.01.16',
       description = "nearest neighbors local estimates",
       author      = "Nicolas B. Garnier",
       author_email= "nicolas.garnier@ens-lyon.fr",
