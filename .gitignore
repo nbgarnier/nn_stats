@@ -10,12 +10,9 @@ Makefile
 src/mask_old.c 
 config.log 
 config.status 
-src/cython/build/* 
-src/cython/dist/* s
-src/cython/doc/* 
-src/cython/entropy.egg-info/* 
-src/cython/tests/* 
-src/cython/tools.old/* 
+src/cython/build/ 
+src/cython/dist/ 
+src/cython/doc/ 
 .DS_Store 
 config.h 
 config.h.in~ 
@@ -24,9 +21,6 @@ include/.DS_Store
 include/ANN/ANN.h 
 src/.DS_Store 
 src/cython/.DS_Store 
-src/cython/build/ 
-src/cython/dist/ 
-src/cython/doc/ 
 src/cython/nn_stats/.DS_Store 
 src/cython/nn_stats/__pycache__/ 
 src/cython/nn_stats/build/ 
