@@ -38,12 +38,13 @@ extern ANNkd_tree*	    kdTree;     // search structure
 
 
 
-int binomial_1[2] = {1, -1};
-int binomial_2[3] = {1, -2,  1};
-int binomial_3[4] = {1, -3,  3,  -1};
-int binomial_4[5] = {1, -4,  6,  -4,  1};
-int binomial_5[6] = {1, -5, 10, -10,  5, -1};
-int binomial_6[7] = {1, -6, 15, -20, 15, -6, 1};  
+int binomial_1[2] = {1, 1};
+int binomial_2[3] = {1, 2,  1};
+int binomial_3[4] = {1, 3,  3,  1};
+int binomial_4[5] = {1, 4,  6,  4,  1};
+int binomial_5[6] = {1, 5, 10, 10,  5,  1};
+int binomial_6[7] = {1, 6, 15, 20, 15,  6, 1};  
+int binomial_7[8] = {1, 7, 21, 35, 35, 21, 7, 1};  
 
 int *get_binomial(int order)
 {   if      (order==1) return binomial_1; // a trick
@@ -52,6 +53,7 @@ int *get_binomial(int order)
     else if (order==4) return binomial_4;
     else if (order==5) return binomial_5;
     else if (order==6) return binomial_6;
+    else if (order==7) return binomial_7;
     else return NULL;
 }
 
@@ -97,18 +99,18 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
 
     R[0] = (double)dists[core][N-1];
     
+    if (order_max>0)                            // added 2025-01-16 for robustness
     for (d=0; d<nA; d++)
-    {   mom[0] = 1.; // convention
+    {   mom[0] = 1.;                            // convention for moment of order 0
         for (j_moments=1; j_moments<=order_max; j_moments++)
         {   mom[j_moments]=0.;
         }
         
         for (i=0; i<N; i++)
-        {   tmp = (A+npts*d)[nnIdx[core][i]];
+        {   tmp  = (A+npts*d)[nnIdx[core][i]];
 
-            mom[1] += tmp;                      // first order moment (expected value)
-            prod    = tmp;
-            for (j_moments=2; j_moments<=order_max; j_moments++)
+            prod = 1.;
+            for (j_moments=1; j_moments<=order_max; j_moments++)
             {   prod *= tmp;
                 mom[j_moments] += prod;
             }
@@ -121,12 +123,13 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
         }
         else                    // central moments: https://en.wikipedia.org/wiki/Central_moment
         {   if (order_max>0)    
-                mean = mom[1]/N;                    // mean
-                moments[npts_out*(nA*0 + d)] = mean;
+            {   mean = mom[1]/N;                        // mean (expected value) or initial data
+                moments[npts_out*(nA*0 + d)] = 0.;      // mean of centered data is 0
+            }
             for (j_moments=1; j_moments<order_max; j_moments++)
             {   moments[npts_out*(nA*j_moments + d)] = 0.0;
                 for (l=0; l<=j_moments+1; l++)
-                   moments[npts_out*(nA*j_moments + d)] += get_binomial(j_moments+1)[l] * mom[l]/N * pow(mean, j_moments-l);
+                   moments[npts_out*(nA*j_moments + d)] += get_binomial(j_moments+1)[l] * mom[l]/N * pow(-mean, j_moments+1-l);
             }
         }
 //        v -= m*m/N;
@@ -169,7 +172,8 @@ double ANN_compute_stats_multi_k(double *x, double *A, k_vector k_vec, double *R
     int ind_k, k_max=k_vec.A[k_vec.ind_max-1];  // !!! k must be sorted, we take the largest
 
     std::vector<double> mom;                    // 2024/10/28: to optimize computations, C++ allocation 
-    mom.resize(nA*(order_max+1));               // 2025/01/14: to compute central moments
+    mom.resize(nA*(order_max+1));               // 2025/01/14: to compute central moments, we include moment of order 0
+    for (d=0; d<nA*(order_max+1); d++)  mom[d]=0.;
 
     kdTree->annkSearch(x,                       // query point
                        k_max+ANN_ALLOW_SELF_MATCH,  // number of near neighbors (including or excluding central point)
@@ -178,48 +182,41 @@ double ANN_compute_stats_multi_k(double *x, double *A, k_vector k_vec, double *R
                        ANN_eps);
 
     N_old=0;
-    for (d=0; d<nA*(order_max+1); d++)
-    {   mom[d]=0.;
-    }
-
     for (ind_k=k_vec.ind_min; ind_k<k_vec.ind_max; ind_k++)
     {   N=k_vec.A[ind_k]-1+ANN_ALLOW_SELF_MATCH;
         if (R!=NULL) R[npts_out*ind_k] = (double)dists[core][N-1];
 
         for (d=0; d<nA; d++)
-        {   for (i=N_old; i<N; i++) 
+        {   
+            for (i=N_old; i<N; i++) 
             {   tmp        = (A+npts*d)[nnIdx[core][i]]; 
-
-                mom[d]     = 1.;                   // convention: moment of order 0
-                mom[d+nA] += tmp;                  // first order moment (expected value)
-                prod       = tmp;
-                for (j_moments=2; j_moments<=order_max; j_moments++)
+                
+                prod       = 1.;
+                for (j_moments=1; j_moments<=order_max; j_moments++)
                 {   prod *= tmp;
                     mom[d + j_moments*nA] += prod;
                 }
             }
-//            mean[npts_out*(ind_k+d*k_vec.N)] = m[d]/N;
-//            var [npts_out*(ind_k+d*k_vec.N)] = (v[d]-m[d]*m[d]/N)/(N-1);  // unbiased estimator
 
-            if (do_center==0)       // non-centered moments (moments about the origin):
-            for (j_moments=0; j_moments<order_max; j_moments++)
-            {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)] = mom[d + (j_moments+1)*nA]/N;
+            if (do_center==0)       // natural moments (moments about the origin):
+            {   for (j_moments=0; j_moments<order_max; j_moments++)
+                {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)] = mom[d + (j_moments+1)*nA]/N;
+                }
             }
             else                    // central moments: https://en.wikipedia.org/wiki/Central_moment
-            {   if (order_max>0)    
-                    mean = mom[1]/N;                    // mean
-                    moments[npts_out*(nA*(k_vec.N*0 + ind_k) + d)] = mean;
+            {   
+                if (order_max>0)    
+                {   mom[d] = N;                   // convention for moment of order 0
+                    mean   = mom[d + 1*nA] /N;         
+                    moments[npts_out*(nA*(k_vec.N*0 + ind_k) + d)] = 0.;    // central moment of order 1
+                }
                 for (j_moments=1; j_moments<order_max; j_moments++)
                 {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)]  = 0.0;
                     for (l=0; l<=j_moments+1; l++)
-                       moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)] += get_binomial(j_moments+1)[l] * mom[d + l*nA]/N * pow(mean, j_moments-l);
+                    {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)] += get_binomial(j_moments+1)[l] * mom[d + l*nA]/N * pow(-mean, j_moments+1-l);
+                    }
                 }
             }
-
-
-
-
-
         }
 
         N_old=N;

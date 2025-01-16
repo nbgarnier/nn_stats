@@ -35,3 +35,4 @@ src/cython/nn_stats/nn_statistics.c
 entropy.dev..code-workspace
 .vscode/*.json
 .vscode/
+src/cython/nn_stats.egg-info/

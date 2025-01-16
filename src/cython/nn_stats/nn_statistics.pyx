@@ -84,12 +84,13 @@ def compute_local_stats(double[:, ::1] x,
     if (npts_out<ny):     raise ValueError("please transpose y")
     if (npts_A!=npts_in): raise ValueError("A and x do not have the same nb of points!")
     if (ny!=nx):          raise ValueError("y and x do not have the same dimensionality!")
-    if (order_max<1):     raise ValueError("order_max must be at least 1")
+    if (order_max<0):     raise ValueError("order_max cannot be negative!")
     if ( (nb_k>1) or (k[0]>0) ) and ( (nb_R>1) or (R[0]>0) ):
                           raise ValueError("specify either k or radius R, but not both!")
     if (nb_k>1) and (PNP.min(PNP.diff(k))<0):   raise ValueError("k should be sorted (with increasing values)")
     if (nb_R>1) and (PNP.min(PNP.diff(R))<0):   raise ValueError("R should be sorted (with increasing values)")
     if (k[0]==0) and (R[0]==0):                 raise ValueError("specify at least k or radius R!")
+    if centered and (order_max>7):              raise ValueError("maximal order of central moments cannot exceed 7; use non-centered moments instead")
     
     nn_statistics.tree_k_max=nn_max                     # if (-1) then auto set to 1/10 of available points in x
 
@@ -117,11 +118,11 @@ def compute_local_stats(double[:, ::1] x,
         nnn     = PNP.zeros((nb_R,npts_out), dtype=PNP.intc)
         moments = PNP.zeros((order_max*nb_R*nA,npts_out), dtype=PNP.float64)
         if (nb_R==1):
-            if verbosity: print("1 value of R^2 :", R[0]) 
+            if verbosity: print("1 value of R :", R[0]) 
             nn_statistics.compute_stats_fixed_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, R2[0], &moments[0,0], order_max, centered, &nnn[0,0])
             mom = PNP.asarray(moments).reshape(order_max, nA, npts_out)
         else:
-            if verbosity: print("multiple values of R^2 :", PNP.array(R))
+            if verbosity: print("multiple values of R :", PNP.array(R))
             nn_statistics.compute_stats_multi_R_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, &R2[0], nb_R, &moments[0,0], order_max, centered, &nnn[0,0])
             mom = PNP.asarray(moments).reshape(order_max, nb_R, nA, npts_out)
         ret = [PNP.asarray(nnn)]                        # we return the nb of neighbors
