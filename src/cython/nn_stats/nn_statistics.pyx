@@ -26,7 +26,7 @@ def compute_local_stats(double[:, ::1] x,
                         int             nn_max = -1, 
                         int             verbosity = -1):
     """     
-    compute local averages (and corresponding stds) of observables A (possibly multi-dimensional)
+    compute local moments (mean, variance, etc.) of observables A (possibly multi-dimensional) initially 
     given at locations x (usually 2-dimensional).
     
     The averages are computed at new locations y, using either:

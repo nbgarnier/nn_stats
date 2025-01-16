@@ -1,12 +1,13 @@
 Metadata-Version: 2.2
 Name: nn_stats
-Version: 0.8.2
+Version: 1.0
 Summary: nearest neighbors estimates of local averages
 Author: Nicolas B. Garnier
 Author-email: "Nicolas B. Garnier" <nicolas.garnier@ens-lyon.fr>
 Maintainer-email: "Nicolas B. Garnier" <nicolas.garnier@ens-lyon.fr>
 License: BSD-3-Clause
-Project-URL: Repository, https://github.com/nbgarnier/entropy
+Project-URL: Homepage, https://github.com/nbgarnier/nn_stats
+Project-URL: Repository, https://github.com/nbgarnier/nn_stats
 Keywords: nearest neighbors,statistics#
 Classifier: Development Status :: 2 - Beta
 Classifier: Programming Language :: Python :: 3
