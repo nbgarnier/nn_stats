@@ -25,32 +25,11 @@
 #define UNUSED(expr) do { (void)(expr); } while (0)
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables
 
-
 // #include "ann_1.1.2/src/pr_queue_k.h"	// 2021-12-01, k-element priority queue, for definition of ANNmin_k
 
 // global variables for (internal, but lower level so "private") operations on the main tree:
 // note that for these variables, moved from other .cpp files, the names have been kept for
 // consistency accross the library
-
-// 2021-12-07: allocation of these modified (for pthread) variables here in ANN_wrapper.cpp
-// the following variables are declared in "ann_1.1.2/src/kd_search.h"
-// and they are defined "for real" in "ann_1.1.2/src/kd_search.cpp"  
-//extern int      *ANNkdDim;          // dimension of space 
-//extern ANNpoint *ANNkdQ;            // 2021-12-01, query point, adapted for pthread
-//extern ANNmin_k	**ANNkdPointMK;	    // 2021-12-01, set of k closest points, adapted for pthread
-                                    
-// 2021-12-03: allocation of these modified (for pthread) variables here in ANN_wrapper.cpp
-// global variables for (internal, private or lower level) operations on the sub-trees:
-// the following variables are defined "for real" in "kd_fix_rad_search_cpp" 
-// and their names have been kept for consistency accross the library
-//extern int	    *ANNkdFRDim;		// dimension of space
-//extern ANNpoint *ANNkdFRQ;          // query point
-//extern ANNdist  *ANNkdFRSqRad;		// squared radius search bound                                    
-//extern ANNmin_k	**ANNkdFRPointMK;   // set of k closest points (unused)
-//extern int	    *ANNkdFRPtsVisited; // total points visited (usused indeed)
-//extern int	    *ANNkdFRPtsInRange; // number of points in the range // 2021-12-07: needs a mutex!!!
-//extern pthread_mutex_t mutex_annkFRSearch;     // 2021-12-07, NBG: experimentation
-//extern pthread_mutex_t mutex_strong;     // 2021-12-07, NBG: experimentation
 
 // global variables for the main tree, internal to the C++ code, but exposed only in ANN_Wrapper.cpp:
 double	        ANN_eps = 0.f;  // error bound, exact search if 0
@@ -58,12 +37,6 @@ ANNpointArray	dataPts;        // data points, type (*(*double))
 ANNidxArray	   *nnIdx;          // k-nn indices    // 2021, adapted for pthread 
 ANNdistArray   *dists;          // k-nn distances  // 2021, adapted for pthread
 ANNkd_tree*	    kdTree;         // search structure
-
-// global variables for the subtrees, internal to the C++ code, but exposed only in ANN_Wrapper.cpp:
-//ANNpointArray   dataPts_1;      // data points, type (*(*double))
-// ANNidxArray    *nnIdx_1;        // near neighbor indices
-// ANNdistArray   *dists_1;        // near neighbor distances
-//ANNkd_tree*     kdTree_1;       // search structure
  
 // allocate function (housekeeping) :
 int init_ANN(int maxPts, int dim, int max_k, int NCORES=1)

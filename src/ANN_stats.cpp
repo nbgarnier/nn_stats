@@ -29,9 +29,8 @@
                                     
 // global variables for the main tree, internal to the C++ code, but exposed only in ANN_Wrapper.cpp:
 extern double	        ANN_eps;    // error bound, exact search if 0
-// extern ANNpointArray	dataPts;        // data points, type (*(*double))
 extern ANNidxArray	   *nnIdx;      // k-nn indices    // 2021, adapted for pthread 
-extern ANNdistArray   *dists;       // k-nn distances  // 2021, adapted for pthread
+extern ANNdistArray    *dists;      // k-nn distances  // 2021, adapted for pthread
 extern ANNkd_tree*	    kdTree;     // search structure
 
 
@@ -101,7 +100,7 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
     
     if (order_max>0)                            // added 2025-01-16 for robustness
     for (d=0; d<nA; d++)
-    {   mom[0] = 1.;                            // convention for moment of order 0
+    {   mom[0] = (double)N;                            // convention for moment of order 0
         for (j_moments=1; j_moments<=order_max; j_moments++)
         {   mom[j_moments]=0.;
         }
@@ -132,12 +131,6 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
                    moments[npts_out*(nA*j_moments + d)] += get_binomial(j_moments+1)[l] * mom[l]/N * pow(-mean, j_moments+1-l);
             }
         }
-//        v -= m*m/N;
-//        m /= N;
-//        v /= N-1; // unbiased estimator
-
-//        mean[npts_out*d] = m;
-//        var [npts_out*d] = v;
 
     }
 
@@ -162,7 +155,7 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
 /* 2024-10-29 - full rewritting, for optimization                                       */
 /* 2024-12-16 - replaced int *k, int Nk by k_vector k_vec                               */
 /* 2025-01-13 - replaced "mean" and "var" by "moments" and "order_max"                  */
-/*              var and mean (and larger order moments) will be saved in moments        */
+/*              var and mean (and larger order moments) will be returned in moments     */
 /*              order_max is the largest order of the moments to be computed            */
 /****************************************************************************************/
 double ANN_compute_stats_multi_k(double *x, double *A, k_vector k_vec, double *R, double *moments, int order_max, int npts_out, int nA, int do_center, int core)
@@ -190,7 +183,6 @@ double ANN_compute_stats_multi_k(double *x, double *A, k_vector k_vec, double *R
         {   
             for (i=N_old; i<N; i++) 
             {   tmp        = (A+npts*d)[nnIdx[core][i]]; 
-                
                 prod       = 1.;
                 for (j_moments=1; j_moments<=order_max; j_moments++)
                 {   prod *= tmp;
@@ -206,7 +198,7 @@ double ANN_compute_stats_multi_k(double *x, double *A, k_vector k_vec, double *R
             else                    // central moments: https://en.wikipedia.org/wiki/Central_moment
             {   
                 if (order_max>0)    
-                {   mom[d] = N;                   // convention for moment of order 0
+                {   mom[d] = (double)N;             // convention for moment of order 0
                     mean   = mom[d + 1*nA] /N;         
                     moments[npts_out*(nA*(k_vec.N*0 + ind_k) + d)] = 0.;    // central moment of order 1
                 }

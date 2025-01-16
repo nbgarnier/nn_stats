@@ -1,9 +1,0 @@
-pyproject.toml
-setup.py
-nn_stats/a__init__.py
-nn_stats/nn_statistics.c
-nn_stats.egg-info/PKG-INFO
-nn_stats.egg-info/SOURCES.txt
-nn_stats.egg-info/dependency_links.txt
-nn_stats.egg-info/requires.txt
-nn_stats.egg-info/top_level.txt
