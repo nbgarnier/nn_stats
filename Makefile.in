@@ -51,8 +51,8 @@ zip : clean
 	$(TAR) -rvf code.tar include/
 	$(TAR) -rvf code.tar examples/
 	$(TAR) -rvf code.tar src/ann_1.1.2/*
-	$(TAR) -rvf code.tar src/ANN_wrapper.cpp \
-		src/ANN_stats.cpp src/ANN_threads.c src/library_commons.c \
+	$(TAR) -rvf code.tar src/ANN_wrapper.cpp src/ANN_threads.c \
+		src/ANN_stats.cpp src/ANN_stats_kernel.cpp src/library_commons.c \
 		src/nn_stats_fixed_k_threads.c src/nn_stats_fixed_R_threads.c \
 		src/timings.c src/verbosity.c
 	$(TAR) -rvf code.tar src/cython/setup.py src/cython/pyproject.toml \
