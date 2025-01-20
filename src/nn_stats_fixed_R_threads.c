@@ -9,14 +9,16 @@
  
 #include <stdlib.h>
 #include <stdio.h>      // for printf
-#include <string.h>     // for malloc
+// #include <string.h>     // for malloc
 #include <pthread.h>
 
 #include "ANN_threads.h"
 #include "ANN_wrapper.h"
 #include "ANN_stats.h"
-#include "library_commons.h"   // for tree_k_max
-#include "data.h"       // for data structs
+#include "ANN_stats_kernel.h"
+#include "library_commons.h"    // for tree_k_max
+#include "kernels.h"            // for kernels definitions
+#include "data.h"               // for data structs
 
 #define noDEBUG // set to "DEBUG". can also set to "DEBUG_N"
 #define i_look 388 // for debug with "DEBUG_N"
@@ -93,8 +95,12 @@ void *threaded_stats_fixed_R_func(void *ptr)
                 (obs_moments.A+i)[obs_moments.Npts*(nA*j_moment + d)] = my_NAN;
                 
         }
-        else ANN_compute_stats_single_k(queryPt, obs_in.A, k, ratou, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
-//        printf("R = %1.2f (input) vs %1.2f (out)\n", R, ratou[0]);
+        else 
+        {   if (current_kernel_type>0)
+                ANN_compute_stats_kernel_single_k(queryPt, obs_in.A, k, ratou, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
+            else
+                ANN_compute_stats_single_k       (queryPt, obs_in.A, k, ratou, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
+        }
     }
     
     out->n_eff    = n_eff;
@@ -184,7 +190,8 @@ int compute_stats_fixed_R_threads(double *x, double *A, int npts_in, int nx, int
 /****************************************************************************************/
 /* function to be used by "compute_stats_multi_R_threads"                               */
 /*                                                                                      */
-/* 2021-11-26  first multi-threads version                                              */
+/* 2021-11-26 - first multi-threads version                                             */
+/* 2025-01-20 - now with specific kernel, if resuired (globaly)                         */
 /****************************************************************************************/
 void *threaded_stats_multi_R_func(void *ptr)
 {   struct thread_args  *args = (struct thread_args *)ptr; // cast arguments to the usable struct
@@ -243,37 +250,24 @@ void *threaded_stats_multi_R_func(void *ptr)
         if ( (ind_k_min<R_in.dim) && (ind_k_min<ind_k_max) )
         {   k_vec.ind_min = ind_k_min;
             k_vec.ind_max = ind_k_max;
-            ANN_compute_stats_multi_k(queryPt, obs_in.A, k_vec, NULL, obs_moments.A+i, order_max, obs_moments.Npts, nA, do_center, core);
-#ifdef DEBUG
-            printf("OK");
-#endif
+            if (current_kernel_type>0)      // then we use a special kernel
+                ANN_compute_stats_kernel_multi_k(queryPt, obs_in.A, k_vec, NULL, obs_moments.A+i, order_max, obs_moments.Npts, nA, do_center, core);
+            else
+                ANN_compute_stats_multi_k       (queryPt, obs_in.A, k_vec, NULL, obs_moments.A+i, order_max, obs_moments.Npts, nA, do_center, core);
+                
         }
-#ifdef DEBUG
-        else printf("point %d rejected", i);
-#endif
 
         int my_min = (ind_k_min<R_in.dim) ? ind_k_min : R_in.dim;
         for (j=0; j<my_min; j++)                          
-        {   
-#ifdef DEBUG            
-            if (j==0) printf(" - removing the first %d values of k", my_min);
-#endif
-            for (d=0; d<nA; d++)
+        {   for (d=0; d<nA; d++)
             for (j_moment=0; j_moment<order_max; j_moment++)
                 (obs_moments.A+i)[obs_moments.Npts* (nA*(R_in.dim*j_moment + j) + d)] = my_NAN;
         }
         for (j=ind_k_max; j<R_in.dim; j++)                     
-        {
-#ifdef DEBUG
-            if (j==ind_k_max) printf(" - removing the last %d values of k", R_in.dim-ind_k_max);
-#endif
-            for (d=0; d<nA; d++)
+        {   for (d=0; d<nA; d++)
             for (j_moment=0; j_moment<order_max; j_moment++)
                 (obs_moments.A+i)[obs_moments.Npts* (nA*(R_in.dim*j_moment + j) + d)] = my_NAN;
         }
-#ifdef DEBUG
-        printf("\n");
-#endif
     }
     
     out->n_eff    = n_eff;
