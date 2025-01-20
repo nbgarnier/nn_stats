@@ -66,7 +66,7 @@ double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R,
         norm = 0.;
         for (i=0; i<N; i++)
         {   tmp    = (A+npts*d)[nnIdx[core][i]];
-            weight = current_kernel(dists[core][i], obs_scale);
+            weight = current_kernel(dists[core][i], current_obs_scale);
             prod   = 1.;
             for (j_moments=1; j_moments<=order_max; j_moments++)
             {   prod *= tmp;
@@ -145,7 +145,7 @@ double ANN_compute_stats_kernel_multi_k(double *x, double *A, k_vector k_vec, do
         {   norm = 0.;
             for (i=N_old; i<N; i++) 
             {   tmp        = (A+npts*d)[nnIdx[core][i]]; 
-                weight     = current_kernel(dists[core][i], obs_scale); // current_kernel and obs_Scale are global variables
+                weight     = current_kernel(dists[core][i], current_obs_scale); // current_kernel and obs_scale are global variables
                 prod       = 1.;
                 for (j_moments=1; j_moments<=order_max; j_moments++)
                 {   prod *= tmp;
@@ -166,7 +166,7 @@ double ANN_compute_stats_kernel_multi_k(double *x, double *A, k_vector k_vec, do
                     mean   = mom[d + 1*nA] /norm;         
                     moments[npts_out*(nA*(k_vec.N*0 + ind_k) + d)] = 0.;    // central moment of order 1
                 }
-                for (j_moments=1; j_moments<order_max; j_moments++)
+                for (j_moments=1; j_moments<order_max; j_moments++)         // moments of order >=2
                 {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)]  = 0.0;
                     for (l=0; l<=j_moments+1; l++)
                     {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)] += get_binomial(j_moments+1)[l] * mom[d + l*nA]/norm * pow(-mean, j_moments+1-l);

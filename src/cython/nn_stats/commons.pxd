@@ -24,6 +24,6 @@ cdef extern from "ANN_threads.h":
 	int 	adapt_cores_number		(int npts_eff)
 
 cdef extern from "kernels.h":
-	extern int current_kernel_type;
-	extern double obs_scale;
+	extern int 		current_kernel_type;
+	extern double 	current_obs_scale;
 	void 	select_kernel(int kernel_type, double prescribed_scale)

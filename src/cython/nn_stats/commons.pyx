@@ -49,7 +49,7 @@ def set_kernel(int kernel_type=0, double scale=1.0):
    """
    sets the kernel ot use for local averagings, and its scale
     
-    :param kernel_type: an integer that indicates the kernel type (default=0)
+    :param kernel_type: an integer that indicates the kernel type (default: no kernel)
     :param scale: a positive real number that defines the (observation) scale for the kernel
     :returns: no output
     
@@ -77,8 +77,15 @@ def get_kernel(verb=1):
       -  2 : Gaussian
       -  ...
     """
-    if (verb): print("kernel type", commons.current_kernel_type, "with scale %2.2f" %commons.obs_scale)
-    return(commons.current_kernel_type, commons.obs_scale)
+    if (verb): 
+      print("kernel type", commons.current_kernel_type, end=" ")
+      if   (commons.current_kernel_type==0): print("(no kernel)", end=" ")
+      elif (commons.current_kernel_type==1): print("(brickwall)", end=" ")
+      elif (commons.current_kernel_type==2): print("(Gaussian)", end=" ")
+      elif (commons.current_kernel_type==3): print("(triangle)", end=" ")
+      if   (commons.current_kernel_type<2):  print("(scale unused)")
+      else: print("with scale %2.2f" %commons.current_obs_scale)
+    return(commons.current_kernel_type, commons.current_obs_scale)
 
 
 

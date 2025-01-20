@@ -10,12 +10,13 @@
 #define noDEBUG
 #define DEBUG_N 37
 
-#include "ANN/ANN.h"
-#include "ANN_wrapper.h"        // definitions of functions only
-#include "ANN_stats.h"          // definitions of functions only
 #include <stdio.h>              // for printf, to be removed
 #include <iostream>
 #include <vector>               // for Debian compile
+#include "ANN/ANN.h"
+#include "ANN_wrapper.h"        // definitions of functions only
+#include "ANN_stats.h"          // definitions of functions only
+
 
 // #define UNUSED(expr) do { (void)(expr); } while (0)
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables
