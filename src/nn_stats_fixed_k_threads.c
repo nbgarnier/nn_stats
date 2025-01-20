@@ -16,6 +16,8 @@
 #include "ANN_threads.h"
 #include "ANN_wrapper.h"
 #include "ANN_stats.h"
+#include "ANN_stats_kernel.h"
+#include "kernels.h"
 #include "data.h"       // for data structs
 
 // #include "library_commons.h"   // for is_zero()
@@ -29,7 +31,7 @@ struct thread_args
         int nA;         // dimensionality of observables
         int order_max;  // maximum order of moments to be computed
         int do_center;  // for central moments or moments from the origin
-        double obs_scale; // scale for local averagings
+//        double obs_scale; // scale for local averagings
         int k;          // nb of neighbors to search for
     };
 
@@ -41,7 +43,7 @@ struct thread_output
 // dangerous: global variables:
 array pos_out;      // for the locations (examination locations)
 array obs_in;       // for the observables at the initial locations
-k_vector k_in_vec;  // 2024-12-16 to be simplified with declaratino above
+k_vector k_in_vec;  // 2024-12-16 to be simplified with declaration above
 array rad_out;      // for the radius of the k-nn (output)
 array obs_moments;  // 2025-01-13: for local moments of order 1, 2, ..., order_max, on the outpout locations (output)
 
@@ -66,11 +68,17 @@ void *threaded_stats_fixed_k_func(void *ptr)
 
     double queryPt[nx]; // to be optimized
 
+    if (current_kernel_type>0)      // then we use a special kernel
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
-        ANN_compute_stats_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
+        ANN_compute_stats_kernel_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
     }
-    
+    else
+    for (i=i_start; i<i_end; i++)
+    {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
+        ANN_compute_stats_single_k       (queryPt, obs_in.A, k, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
+    }
+
     out->n_eff    = n_eff;
     pthread_exit(out);
 }
@@ -169,13 +177,20 @@ void *threaded_stats_multi_k_func(void *ptr)
         nA       = args->nA,
         order_max= args->order_max,
         do_center= args->do_center,
-        n_eff    = i_end-i_start; // how many points in this thread
+        n_eff    = i_end-i_start;   // how many points in this thread
 
     double queryPt[nx]; // to be optimized
 
+    if (current_kernel_type>0)      // then we use a special kernel
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
-        ANN_compute_stats_multi_k(queryPt, obs_in.A, k_in_vec, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
+        ANN_compute_stats_kernel_multi_k(queryPt, obs_in.A, k_in_vec, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
+//        printf("%1.0f %1.0f -> %1.2f\n", pos_out.A[i], pos_out.A[i+pos_out.Npts], rad);
+    }
+    else                            // or we use the regulat averaging kernel (a brickwall)
+    for (i=i_start; i<i_end; i++)
+    {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
+        ANN_compute_stats_multi_k       (queryPt, obs_in.A, k_in_vec, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
 //        printf("%1.0f %1.0f -> %1.2f\n", pos_out.A[i], pos_out.A[i+pos_out.Npts], rad);
     }
     
@@ -264,4 +279,5 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
 } /* end of function "compute_stats_multi_k_threads" *************************************/
 
 
-#include "nn_stats_kernel_fixed_k_threads.c"
+// 2025-01-20, we drop this dev branch:
+// #include "nn_stats_kernel_fixed_k_threads.c"

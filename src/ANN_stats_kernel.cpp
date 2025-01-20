@@ -79,12 +79,11 @@ double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R,
 
     R[0] = (double)dists[core][N-1];
 
-//    obs_scale = 2*R[0];                                 // size of observation scale "d" for the kernel
+//    obs_scale = 2*R[0];                       // size of observation scale "d" for the kernel
     
     if (order_max>0)                            // added 2025-01-16 for robustness
     for (d=0; d<nA; d++)
-    {   mom[0] = (double)N;                     // convention for moment of order 0
-        for (j_moments=1; j_moments<=order_max; j_moments++)
+    {   for (j_moments=1; j_moments<=order_max; j_moments++)
         {   mom[j_moments]=0.;
         }
         
@@ -99,6 +98,7 @@ double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R,
             }
             norm += weight;
         }
+        mom[0] = (double)norm;                  // convention for moment of order 0
 
         if (do_center==0)       // non-centered moments (moments about the origin):
         {   for (j_moments=0; j_moments<order_max; j_moments++)
@@ -140,13 +140,13 @@ double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R,
 /* 2024-10-29 - full rewritting, for optimization                                       */
 /* 2024-12-16 - replaced int *k, int Nk by k_vector k_vec                               */
 /* 2025-01-13 - replaced "mean" and "var" by "moments" and "order_max"                  */
-/*              var and mean (and larger order moments) will be returned in moments     */
+/*              var and mean (and larger order moments) will be returned in "moments"   */
 /*              order_max is the largest order of the moments to be computed            */
 /****************************************************************************************/
 double ANN_compute_stats_kernel_multi_k(double *x, double *A, k_vector k_vec, double *R, double *moments, int order_max, int npts_out, int nA, int do_center, int core)
 {   int i, d, N=1, N_old, j_moments, l;
     int npts=kdTree->nPoints();
-    double tmp, prod, mean; 
+    double tmp, prod, mean, weight, norm; 
     int ind_k, k_max=k_vec.A[k_vec.ind_max-1];  // !!! k must be sorted, we take the largest
 
     std::vector<double> mom;                    // 2024/10/28: to optimize computations, C++ allocation 
@@ -164,33 +164,35 @@ double ANN_compute_stats_kernel_multi_k(double *x, double *A, k_vector k_vec, do
     {   N=k_vec.A[ind_k]-1+ANN_ALLOW_SELF_MATCH;
         if (R!=NULL) R[npts_out*ind_k] = (double)dists[core][N-1];
 
-        for (d=0; d<nA; d++)
-        {   
+        for (d=0; d<nA; d++)                    // 2025-01-20: may be more efficient to loop on nA after computing weights?
+        {   norm = 0.;
             for (i=N_old; i<N; i++) 
             {   tmp        = (A+npts*d)[nnIdx[core][i]]; 
+                weight     = current_kernel(dists[core][i], obs_scale); // current_kernel and obs_Scale are global variables
                 prod       = 1.;
                 for (j_moments=1; j_moments<=order_max; j_moments++)
                 {   prod *= tmp;
-                    mom[d + j_moments*nA] += prod;
+                    mom[d + j_moments*nA] += prod * weight;
                 }
+                norm += weight;
             }
 
             if (do_center==0)       // natural moments (moments about the origin):
             {   for (j_moments=0; j_moments<order_max; j_moments++)
-                {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)] = mom[d + (j_moments+1)*nA]/N;
+                {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)] = mom[d + (j_moments+1)*nA]/norm;
                 }
             }
             else                    // central moments: https://en.wikipedia.org/wiki/Central_moment
             {   
                 if (order_max>0)    
-                {   mom[d] = (double)N;             // convention for moment of order 0
-                    mean   = mom[d + 1*nA] /N;         
+                {   mom[d] = (double)norm;             // convention for moment of order 0
+                    mean   = mom[d + 1*nA] /norm;         
                     moments[npts_out*(nA*(k_vec.N*0 + ind_k) + d)] = 0.;    // central moment of order 1
                 }
                 for (j_moments=1; j_moments<order_max; j_moments++)
                 {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)]  = 0.0;
                     for (l=0; l<=j_moments+1; l++)
-                    {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)] += get_binomial(j_moments+1)[l] * mom[d + l*nA]/N * pow(-mean, j_moments+1-l);
+                    {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)] += get_binomial(j_moments+1)[l] * mom[d + l*nA]/norm * pow(-mean, j_moments+1-l);
                     }
                 }
             }

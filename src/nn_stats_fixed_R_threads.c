@@ -57,7 +57,7 @@ extern array   pos_out;     // for the locations (examination locations)
 extern array   obs_in;      // for the observables at the initial locations
 extern array obs_moments;   // 2025-01-13: for local moments of order 1, 2, ..., order_max, on the outpout locations (output)
 // last ones are specific to this file:
-array   R_in;               // for the nb of nn (input)
+array   R_in;               // for the radii (input)
 arr_int nnn_out;            // for the nb of nn (output)
 
 

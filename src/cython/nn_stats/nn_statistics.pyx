@@ -23,8 +23,8 @@ def compute_local_stats(double[:, ::1]  x,
                         double[::1]     R = PNP.zeros(shape=(1),dtype=PNP.float64), 
                         int             order_max = 2,
                         bint            centered = False,
-                        bint            use_kernel = False, 
-                        double          obs_scale = 1.,
+#                        bint            use_kernel = False, 
+#                        double          obs_scale = -1.,
                         int             nn_max = -1, 
                         int             verbosity = -1):
     """     
@@ -45,8 +45,8 @@ def compute_local_stats(double[:, ::1]  x,
     :param R: 1d-array of radii to consider for a fixed-radius computation.
     :param order_max: maximal order of the moments to be computed (default=2)
     :param centered: Boolean to indicate if moments are centered (True) or not centered (False) (default=False)
-    :param use_kernel: Boolean to indicate that a special kernel is used. Set this kernel with the function 'set_kernel' (default=False)
-    :param osb_scale: observation scale, for the kernel (default=1.)
+#    :param use_kernel: Boolean to indicate that a special kernel is used. Set this kernel with the function 'set_kernel' (default=False)
+#    :param osb_scale: observation scale, for the kernel (default=1.)
     :param nn_max: maximal nb of neighbors to consider when performing a fixed-R search (default : automatic, 10% of available points)
     :param verbosity: 0 to operate quietly without any message or larger value for more messages
                 (default value can be set by function "set_verbosity")
@@ -95,9 +95,10 @@ def compute_local_stats(double[:, ::1]  x,
     if (nb_R>1) and (PNP.min(PNP.diff(R))<0):   raise ValueError("R should be sorted (with increasing values)")
     if (k[0]==0) and (R[0]==0):                 raise ValueError("specify at least k or radius R!")
     if centered and (order_max>7):              raise ValueError("maximal order of central moments cannot exceed 7; use non-centered moments instead")
-    if (obs_scale<=0):    raise ValueError("observation scale must be positive")
+#    if (obs_scale<=0):    raise ValueError("observation scale must be positive")
 
     nn_statistics.tree_k_max=nn_max                     # if (-1) then auto set to 1/10 of available points in x
+#    set_kernel(use_kernel, obs_scale)                  # kernel should be set and parameterized before (with "set_kernel")
 
     if verbosity: print("computing moments of order 1 up to", order_max)
 
@@ -108,12 +109,12 @@ def compute_local_stats(double[:, ::1]  x,
         moments = PNP.zeros((order_max*nb_k*nA,npts_out), dtype=PNP.float64)
         if (nb_k==1):
             if verbosity: print("1 value of k :", k[0], end=" ")
-            if use_kernel:
-                if verbosity: print("using special kernel, with scale %2.2f", obs_scale)
-                nn_statistics.compute_stats_kernel_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &moments[0,0], order_max, centered, &dists[0,0])
-            else:
-                if verbosity: print("no kernel")
-                nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &moments[0,0], order_max, centered, &dists[0,0])
+#            if use_kernel:
+#                if verbosity: print("using special kernel, with scale %2.2f", obs_scale)
+#                nn_statistics.compute_stats_kernel_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &moments[0,0], order_max, centered, &dists[0,0])
+#            else:
+#                if verbosity: print("no kernel")
+            nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &moments[0,0], order_max, centered, &dists[0,0])
             mom = PNP.asarray(moments).reshape(order_max, nA, npts_out)
         else:
             if verbosity: print("multiple values of k :", PNP.array(k))
