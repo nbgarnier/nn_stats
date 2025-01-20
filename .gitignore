@@ -30,3 +30,4 @@ entropy.dev..code-workspace
 .vscode/*.json
 .vscode/
 src/cython/nn_stats.egg-info/
+examples/test_kernels.py
