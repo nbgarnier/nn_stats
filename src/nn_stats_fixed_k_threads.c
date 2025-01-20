@@ -29,6 +29,7 @@ struct thread_args
         int nA;         // dimensionality of observables
         int order_max;  // maximum order of moments to be computed
         int do_center;  // for central moments or moments from the origin
+        double obs_scale; // scale for local averagings
         int k;          // nb of neighbors to search for
     };
 

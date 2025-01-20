@@ -19,9 +19,12 @@ double kernel_brickwall(double x, double d);
 double kernel_triangle (double x, double d);
 double kernel_Gaussian (double x, double d);
 
-// global variable : the kernel in use, defined in kernel.c
+// global variables : the kernel in use, and the (bservation) scale for the kernel 
+// (all are defined in "kernel.c")
+extern int    current_kernel_type;
 extern double (*current_kernel)(double, double); //= kernel_brickwall;    // default kernel
+extern double obs_scale;
 
-void select_kernel(int kernel_type);
+void select_kernel(int kernel_type, double prescribed_scale);
 
 #endif

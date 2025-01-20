@@ -45,6 +45,42 @@ def get_verbosity(verb=1):
 
 
 
+def set_kernel(int kernel_type, double scale):
+   """
+   sets the kernel ot use for local averagings, and its scale
+    
+    :param kernel_type: an integer that indicates the kernel type (default=0)
+    :param scale: a positive real number that defines the (observation) scale for the kernel
+    :returns: no output
+    
+    kernel_type can be:
+      -  0 : brickwall, all points have the same weight
+      -  1 : triangle
+      -  2 : Gaussian
+      -  ...
+    """
+   commons.select_kernel(kernel_type, scale)
+
+def get_kernel(verb=1):
+    """
+    gets the current kernel type used for averaging, and its associated (observation) scale
+    
+    :param verb: local verbosity of this very function:
+      - 0 for silent running; 
+      - 1 for printing the kernel type in the console
+                 
+    :returns: the kernel type.
+    
+    kernel_type explanation:
+      -  0 : brickwall, all points have the same weight
+      -  1 : triangle
+      -  2 : Gaussian
+      -  ...
+    """
+    if (verb): print("kernel type", commons.current_kernel_type, "with scale %2.2f" %commons.obs_scale)
+    return(commons.current_kernel_type, commons.obs_scale)
+
+
 
 # 2021-12-02
 def multithreading(do_what="info", int nb_cores=0):

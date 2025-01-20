@@ -7,12 +7,15 @@
 /************************************************************************/
 
 int compute_stats_fixed_k_threads       (double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int k,          
-                                                    double *A_moments, int order_max, int do_center, double *dists);
+                                                    double *A_moments, int order_max, int do_center, 
+                                                    double *dists);
 
 int compute_stats_multi_k_threads       (double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int *k, int nk, 
-                                                    double *A_moments, int order_max, int do_center, double *dists);
+                                                    double *A_moments, int order_max, int do_center, 
+                                                    double *dists);
 
 // for speed tests:
 int compute_stats_kernel_fixed_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int k,          
-                                                    double *A_moments, int order_max, int do_center, double *dists);
+                                                    double *A_moments, int order_max, int do_center,
+                                                    double *dists);
 

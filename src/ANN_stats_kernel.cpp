@@ -53,11 +53,11 @@ extern ANNkd_tree*	    kdTree;     // search structure
 /* nA        : nb of observables                                                       */
 /* order_max : maximal order of moments to be computed                                 */
 /* do_center : central moments if ==1, or not-centered moments if ==0                  */
+/* obs_scale : (double) observationcale (local averaging kernel parameter)             */
 /* core      : which core to run on                                                    */
 /* output parameters:                                                                  */
 /* R         : distance of the k-nn from x                                             */
 /* moments   : expected values of observables                                          */
-/* var       : variance of observables                                                 */
 /*                                                                                     */
 /* 2024-10-07 - first version                                                          */
 /* 2024-10-14 - draft for returning distance : to do: check max index                  */
@@ -66,7 +66,7 @@ extern ANNkd_tree*	    kdTree;     // search structure
 double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R, double *moments, int order_max, int npts_out, int nA, int do_center, int core)
 {   int i, d, N=k+ANN_ALLOW_SELF_MATCH-1, j_moments, l;
     int npts=kdTree->nPoints();
-    double tmp, prod, mean, weight, norm, obs_scale;
+    double tmp, prod, mean, weight, norm;
 
     std::vector<double> mom;                    // 2025/01/13: to optimize computations, C++ allocation 
     mom.resize(order_max+1);                    // 2025/01/14: we add the moment of order 0 for ease of use
@@ -79,7 +79,7 @@ double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R,
 
     R[0] = (double)dists[core][N-1];
 
-    obs_scale = 2*R[0];                                 // size of observation scale "d" for the kernel
+//    obs_scale = 2*R[0];                                 // size of observation scale "d" for the kernel
     
     if (order_max>0)                            // added 2025-01-16 for robustness
     for (d=0; d<nA; d++)
