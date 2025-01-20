@@ -45,7 +45,7 @@ def get_verbosity(verb=1):
 
 
 
-def set_kernel(int kernel_type, double scale):
+def set_kernel(int kernel_type=0, double scale=1.0):
    """
    sets the kernel ot use for local averagings, and its scale
     
