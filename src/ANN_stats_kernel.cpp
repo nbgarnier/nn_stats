@@ -11,33 +11,11 @@
 #define noDEBUG
 #define DEBUG_N 37
 
-#include "ANN/ANN.h"
-#include "ANN_wrapper.h"        // definitions of functions only
-#include "ANN_stats.h"          // definitions of functions only
 #include "kernels.h"            // for kernels
 #include "ANN_stats_kernel.h"   // definitions of functions only
-#include <stdio.h>              // for printf, to be removed
-#include <iostream>
-#include <vector>               // for Debian compile
 
 // #define UNUSED(expr) do { (void)(expr); } while (0)
 // https://stackoverflow.com/questions/1486904/how-do-i-best-silence-a-warning-about-unused-variables
-
-
-// #include "ann_1.1.2/src/pr_queue_k.h"	// 2021-12-01, k-element priority queue, for definition of ANNmin_k
-
-// global variables for (internal, but lower level so "private") operations on the main tree:
-// note that for these variables, moved from other .cpp files, the names have been kept for
-// consistency accross the library
-                                    
-// global variables for the main tree, internal to the C++ code, but exposed only in ANN_Wrapper.cpp:
-extern double	        ANN_eps;    // error bound, exact search if 0
-extern ANNidxArray	   *nnIdx;      // k-nn indices    // 2021, adapted for pthread 
-extern ANNdistArray    *dists;      // k-nn distances  // 2021, adapted for pthread
-extern ANNkd_tree*	    kdTree;     // search structure
-
-
-
 
 /***************************************************************************************/
 /* below : piece of code to average observables over nearest neighbors of a point      */
@@ -79,8 +57,6 @@ double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R,
 
     R[0] = (double)dists[core][N-1];
 
-//    obs_scale = 2*R[0];                       // size of observation scale "d" for the kernel
-    
     if (order_max>0)                            // added 2025-01-16 for robustness
     for (d=0; d<nA; d++)
     {   for (j_moments=1; j_moments<=order_max; j_moments++)
@@ -126,6 +102,7 @@ double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R,
 #endif 
     return((double)dists[core][N-1]);
 } /* end of function "ANN_compute_stats_single_k" ***********************************************/
+
 
 
 
@@ -202,4 +179,4 @@ double ANN_compute_stats_kernel_multi_k(double *x, double *A, k_vector k_vec, do
     }
 
     return((double)dists[core][N-1]);
-} /* end of function "ANN_compute_stats_multi_k" ***********************************************/
+} /* end of function "ANN_compute_stats_kernel_multi_k" ***********************************************/
