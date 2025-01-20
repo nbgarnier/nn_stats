@@ -6,7 +6,7 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 import  cython
-import  numpy as PNP # shoud be useless here
+import  numpy as PNP    # shoud be useless here
 cimport numpy as CNP
 cimport commons
 cimport nn_statistics
@@ -16,13 +16,14 @@ include "commons.pyx"   # for basic library manipulation
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def compute_local_stats(double[:, ::1] x, 
+def compute_local_stats(double[:, ::1]  x, 
                         double[:, ::1]  A = PNP.zeros(shape=(0,1),dtype=PNP.float64), 
                         double [:, ::1] y = PNP.zeros(shape=(0,1),dtype=PNP.float64), 
                         int[::1]        k = PNP.zeros(shape=(1),dtype=PNP.intc), 
                         double[::1]     R = PNP.zeros(shape=(1),dtype=PNP.float64), 
                         int             order_max = 2,
                         bint            centered = False,
+                        bint            use_kernel = False, 
                         int             nn_max = -1, 
                         int             verbosity = -1):
     """     
@@ -102,8 +103,13 @@ def compute_local_stats(double[:, ::1] x,
         dists   = PNP.zeros((nb_k,npts_out), dtype=PNP.float64) 
         moments = PNP.zeros((order_max*nb_k*nA,npts_out), dtype=PNP.float64)
         if (nb_k==1):
-            if verbosity: print("1 value of k :", k[0])
-            nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &moments[0,0], order_max, centered, &dists[0,0])
+            if verbosity: print("1 value of k :", k[0], end=" ")
+            if use_kernel:
+                if verbosity: print("using special kernel")
+                nn_statistics.compute_stats_kernel_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &moments[0,0], order_max, centered, &dists[0,0])
+            else:
+                if verbosity: print("no kernel")
+                nn_statistics.compute_stats_fixed_k_threads(&x[0,0], &A[0,0], npts_in, nx, nA, &y[0,0], npts_out, k[0], &moments[0,0], order_max, centered, &dists[0,0])
             mom = PNP.asarray(moments).reshape(order_max, nA, npts_out)
         else:
             if verbosity: print("multiple values of k :", PNP.array(k))

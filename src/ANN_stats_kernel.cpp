@@ -14,6 +14,7 @@
 #include "ANN/ANN.h"
 #include "ANN_wrapper.h"        // definitions of functions only
 #include "ANN_stats.h"          // definitions of functions only
+#include "kernels.h"            // for kernels
 #include "ANN_stats_kernel.h"   // definitions of functions only
 #include <stdio.h>              // for printf, to be removed
 #include <iostream>
@@ -35,32 +36,6 @@ extern ANNidxArray	   *nnIdx;      // k-nn indices    // 2021, adapted for pthre
 extern ANNdistArray    *dists;      // k-nn distances  // 2021, adapted for pthread
 extern ANNkd_tree*	    kdTree;     // search structure
 
-double kernel_brickwall(double x, double d) 
-{   return x;
-}
-
-double kernel_Gaussian(double x, double d) 
-{   return exp(-(x/d)**2 /2);
-}
-
-int binomial_1[2] = {1, 1};
-int binomial_2[3] = {1, 2,  1};
-int binomial_3[4] = {1, 3,  3,  1};
-int binomial_4[5] = {1, 4,  6,  4,  1};
-int binomial_5[6] = {1, 5, 10, 10,  5,  1};
-int binomial_6[7] = {1, 6, 15, 20, 15,  6, 1};  
-int binomial_7[8] = {1, 7, 21, 35, 35, 21, 7, 1};  
-
-int *get_binomial(int order)
-{   if      (order==1) return binomial_1; // a trick
-    else if (order==2) return binomial_2;
-    else if (order==3) return binomial_3;
-    else if (order==4) return binomial_4;
-    else if (order==5) return binomial_5;
-    else if (order==6) return binomial_6;
-    else if (order==7) return binomial_7;
-    else return NULL;
-}
 
 
 
@@ -91,10 +66,7 @@ int *get_binomial(int order)
 double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R, double *moments, int order_max, int npts_out, int nA, int do_center, int core)
 {   int i, d, N=k+ANN_ALLOW_SELF_MATCH-1, j_moments, l;
     int npts=kdTree->nPoints();
-    double tmp, prod, mean, d;
-    double (*fptr)(double, double);
-
-    fptr=&kernel_brickwall;                     // select regular kernel
+    double tmp, prod, mean, weight, norm, obs_scale;
 
     std::vector<double> mom;                    // 2025/01/13: to optimize computations, C++ allocation 
     mom.resize(order_max+1);                    // 2025/01/14: we add the moment of order 0 for ease of use
@@ -107,7 +79,7 @@ double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R,
 
     R[0] = (double)dists[core][N-1];
 
-    d = 2*R[0];                                 // size of observation scale "d" for the kernel
+    obs_scale = 2*R[0];                                 // size of observation scale "d" for the kernel
     
     if (order_max>0)                            // added 2025-01-16 for robustness
     for (d=0; d<nA; d++)
@@ -116,29 +88,32 @@ double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R,
         {   mom[j_moments]=0.;
         }
         
+        norm = 0.;
         for (i=0; i<N; i++)
-        {   tmp  = (A+npts*d)[nnIdx[core][i]] * kernel(dists[core][i], d);
-            prod = 1.;
+        {   tmp    = (A+npts*d)[nnIdx[core][i]];
+            weight = current_kernel(dists[core][i], obs_scale);
+            prod   = 1.;
             for (j_moments=1; j_moments<=order_max; j_moments++)
             {   prod *= tmp;
-                mom[j_moments] += prod;
+                mom[j_moments] += prod * weight;
             }
+            norm += weight;
         }
 
         if (do_center==0)       // non-centered moments (moments about the origin):
         {   for (j_moments=0; j_moments<order_max; j_moments++)
-            {   moments[npts_out*(nA*j_moments + d)] = mom[j_moments+1]/N;
+            {   moments[npts_out*(nA*j_moments + d)] = mom[j_moments+1]/norm;
             }
         }
         else                    // central moments: https://en.wikipedia.org/wiki/Central_moment
         {   if (order_max>0)    
-            {   mean = mom[1]/N;                        // mean (expected value) or initial data
+            {   mean = mom[1]/norm;                   // mean (expected value) or initial data
                 moments[npts_out*(nA*0 + d)] = 0.;      // mean of centered data is 0
             }
             for (j_moments=1; j_moments<order_max; j_moments++)
             {   moments[npts_out*(nA*j_moments + d)] = 0.0;
                 for (l=0; l<=j_moments+1; l++)
-                   moments[npts_out*(nA*j_moments + d)] += get_binomial(j_moments+1)[l] * mom[l]/N * pow(-mean, j_moments+1-l);
+                   moments[npts_out*(nA*j_moments + d)] += get_binomial(j_moments+1)[l] * mom[l]/norm * pow(-mean, j_moments+1-l);
             }
         }
 

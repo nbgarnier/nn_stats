@@ -246,3 +246,4 @@ void free_ANN(int NCORES)
 // a quick fix to a compiler/linker bug:
 // https://stackoverflow.com/questions/75139508/c-extension-for-python-throws-symbol-not-found-in-flat-namespace-zl10func1
 #include "ANN_stats.cpp"
+#include "ANN_stats_kernel.cpp"

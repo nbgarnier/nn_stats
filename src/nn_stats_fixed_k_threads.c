@@ -5,7 +5,7 @@
  *  Copyright 2024 ENS-Lyon - CNRS. All rights reserved.
  *
  *
- *  2024-10-29 - to-do: check if there is a speed improvment when using single_k for multi_k with nk=1
+ *  2024-10-29 - to-do: check if there is a speed improvement when using single_k for multi_k with nk=1
  */
  
 #include <stdlib.h>
@@ -42,8 +42,6 @@ array pos_out;      // for the locations (examination locations)
 array obs_in;       // for the observables at the initial locations
 k_vector k_in_vec;  // 2024-12-16 to be simplified with declaratino above
 array rad_out;      // for the radius of the k-nn (output)
-//array obs_mean;     // for the local average, on the outpout locations (output)
-//array obs_var;      // for the local variance, on the outpout locations (output)
 array obs_moments;  // 2025-01-13: for local moments of order 1, 2, ..., order_max, on the outpout locations (output)
 
 /****************************************************************************************/
@@ -263,3 +261,6 @@ int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int
 	free_ANN(nb_cores);
     return(0);
 } /* end of function "compute_stats_multi_k_threads" *************************************/
+
+
+#include "nn_stats_kernel_fixed_k_threads.c"

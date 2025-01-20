@@ -1,5 +1,5 @@
 /*
- *  nn_stats_fixed_k_threads.c
+ *  nn_stats_kernel_fixed_k_threads.c
  *
  *  Created by Nicolas Garnier on 2024/10/07.
  *  Copyright 2024 ENS-Lyon - CNRS. All rights reserved.
@@ -7,49 +7,16 @@
  *
  *  2024-10-29 - to-do: check if there is a speed improvement when using single_k for multi_k with nk=1
  */
- 
-#include <stdlib.h>
-#include <stdio.h>      // for printf
-#include <string.h>     // for malloc
-#include <pthread.h>
 
-#include "ANN_threads.h"
-#include "ANN_wrapper.h"
-#include "ANN_stats.h"
-#include "data.h"       // for data structs
-
-// #include "library_commons.h"   // for is_zero()
-
-// thread arguments and outputs types:
-struct thread_args
-    {   int core;       // keep track of the current thread number/id
-        int i_start;    // begining of subset of points to work on
-        int i_end;      // end      of subset of points
-        int nx;         // dimensionality of location data
-        int nA;         // dimensionality of observables
-        int order_max;  // maximum order of moments to be computed
-        int do_center;  // for central moments or moments from the origin
-        int k;          // nb of neighbors to search for
-    };
-
-struct thread_output
-    {   int n_eff;
-    };
-
-
-// dangerous: global variables:
-array pos_out;      // for the locations (examination locations)
-array obs_in;       // for the observables at the initial locations
-k_vector k_in_vec;  // 2024-12-16 to be simplified with declaratino above
-array rad_out;      // for the radius of the k-nn (output)
-array obs_moments;  // 2025-01-13: for local moments of order 1, 2, ..., order_max, on the outpout locations (output)
+// extension of (included in) nn_stats_fixed_k_thread.c
+#include "ANN_stats_kernel.h"
 
 /****************************************************************************************/
 /* function to be used by "compute_stats_fixed_k_threads"                               */
 /*                                                                                      */
 /* 2021-11-26  first multi-threads version                                              */
 /****************************************************************************************/
-void *threaded_stats_fixed_k_func(void *ptr)
+void *threaded_stats_kernel_fixed_k_func(void *ptr)
 {   struct thread_args  *args = (struct thread_args *)ptr; // cast arguments to the usable struct
     struct thread_output *out = calloc(sizeof(struct thread_output),1); // allocate heap memory for this thread's results
     register int i,d;
@@ -67,7 +34,7 @@ void *threaded_stats_fixed_k_func(void *ptr)
 
     for (i=i_start; i<i_end; i++)
     {   for (d=0; d<nx; d++) queryPt[d] = pos_out.A[i + d*pos_out.Npts];
-        ANN_compute_stats_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
+        ANN_compute_stats_kernel_single_k(queryPt, obs_in.A, k, rad_out.A + i, obs_moments.A + i, order_max, obs_moments.Npts, nA, do_center, core);
     }
     
     out->n_eff    = n_eff;
@@ -97,7 +64,7 @@ void *threaded_stats_fixed_k_func(void *ptr)
 /*                                                                                      */
 /* 2024-10-07  fork from "compute_entropy_ann_threads", no output yet                   */
 /****************************************************************************************/
-int compute_stats_fixed_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int k, double *A_moments, int order_max, int do_center, double *dists)
+int compute_stats_kernel_fixed_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int k, double *A_moments, int order_max, int do_center, double *dists)
 {	register int core, nb_cores=get_cores_number(GET_CORES_SELECTED), npts_eff_min;
 	int n_total=0; // just for sanity check
 	int ret;
@@ -130,9 +97,9 @@ int compute_stats_fixed_k_threads(double *x, double *A, int npts_in, int nx, int
         my_arguments[core].order_max= order_max;
         my_arguments[core].do_center= do_center;
         my_arguments[core].k        = k;
-        ret=pthread_create(&thread[core], NULL, threaded_stats_fixed_k_func, (void *)&my_arguments[core]);
+        ret=pthread_create(&thread[core], NULL, threaded_stats_kernel_fixed_k_func, (void *)&my_arguments[core]);
         if (ret!=0)
-        {   printf("[compute_stats_fixed_k_threads] TROUBLE! couldn't create thread!\n");
+        {   printf("[compute_stats_kernle_fixed_k_threads] TROUBLE! couldn't create thread!\n");
             return(-1); 
         }
     }
@@ -157,7 +124,7 @@ int compute_stats_fixed_k_threads(double *x, double *A, int npts_in, int nx, int
 /*                                                                                      */
 /* 2021-11-26  first multi-threads version                                              */
 /****************************************************************************************/
-void *threaded_stats_multi_k_func(void *ptr)
+void *threaded_stats_kernel_multi_k_func(void *ptr)
 {   struct thread_args  *args = (struct thread_args *)ptr; // cast arguments to the usable struct
     struct thread_output *out = calloc(sizeof(struct thread_output),1); // allocate heap memory for this thread's results
     register int i,d;
@@ -208,7 +175,7 @@ void *threaded_stats_multi_k_func(void *ptr)
 /*              var and mean (and larger order moments) will be saved in moments        */
 /*              order_max is the largest order of the moments to be computed            */
 /****************************************************************************************/
-int compute_stats_multi_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int *k, int nk, double *A_moments, int order_max, int do_center, double *dists)
+int compute_stats_kernel_multi_k_threads(double *x, double *A, int npts_in, int nx, int nA, double *y, int npts_out, int *k, int nk, double *A_moments, int order_max, int do_center, double *dists)
 {	register int core, nb_cores=get_cores_number(GET_CORES_SELECTED), npts_eff_min;
 	int n_total=0; // just for sanity check
     int k_max=k[nk-1];
