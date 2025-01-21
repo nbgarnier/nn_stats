@@ -2,6 +2,9 @@
 an efficient C/C++ library integrated with Python to estimate local averages (and their corresponding variance) using nearest neighbors estimates.
 This library relies on the [ANN library](http://www.cs.umd.edu/~mount/ANN/) by David Mount and Sunil Arya.
 
+- [v1.0](https://github.com/nbgarnier/nn_stats/releases/tag/v1.0) has been tested OK (central or natural moments OK, arbitrary order moments OK)
+- [v1.5](https://github.com/nbgarnier/nn_stats/) current dev version, with kernel selection: under testing.
+
 Please cite any use of this library with the following DOI:  
 [![DOI](https://zenodo.org/badge/873066948.svg)](https://doi.org/10.5281/zenodo.14523934)
 
@@ -31,6 +34,12 @@ The function returns (1 + order_max) Numpy arrays, in the following order:
   * first, the radii (if k was provided) or the k (if R was provided).
   * then the moments of observable(s) "A" computed locally around the 'destination' locations provided with parameter "y", starting with the first moment (expected value), and up to the moment or order "order_max".
 
+# tuning
+
+- You can select beforehand the number of threads over which the funcion will run.
+
+- You can select the kernel used to compute the local averages (new in V1.5). This is done either by specifying the correct option to the fuction  **"compute_local_stats"**, or by running the function **"set_kernel"** beforehand. See the script /example/test_kernels.py in the example directory.
+
 # additional documentation
 
 There are detailed examples in the examples/ subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
@@ -51,6 +60,8 @@ R=np.array([0.5])                         # single value of R
 R1, mean, var = ns.compute_local_stats(locations, values, loc_new, k=k)   # imposed k (indeed 3 values of k)
 k1, mean, var = ns.compute_local_stats(locations, values, loc_new, R=R)   # imposed R (1 value of R)
 </code></pre>
+
+Using "help(ns.compute_local_stats)" should also give you a glimpse at available options.
 
 # important remarks
 
