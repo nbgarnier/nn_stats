@@ -32,8 +32,43 @@ double kernel_Epanechnikov(double x, double d)
     else return 0.;
 }
 
+double kernel_triweight(double x, double d) 
+{   double a=kernel_Epanechnikov(x, d);
+    return a*a*a;
+}
+
+double kernel_tricube(double x, double d) 
+{   double u=x/d, a=0.;
+    if (u<1.) 
+    {   a=1.-u*u*u;
+        return a*a*a;
+    }
+    else return 0.;
+}
+
+double kernel_cosine(double x, double d) 
+{   double u=x/d;
+    if (u<1.) return cos(PI*u/2);
+    else return 0.;
+}
+
 double kernel_exponential(double x, double d) 
 {   return exp(-(x/d));
+}
+
+double kernel_logistic(double x, double d) 
+{   double u=x/d;
+    return 1./(exp(u) + 2. + exp(-u));
+}
+
+double kernel_sigmoid(double x, double d) 
+{   double u=x/d;
+    return 1./(exp(u) + exp(-u));
+}
+
+double kernel_Silverman(double x, double d) 
+{   double u=x/d/sqrt(2.);
+    return (exp(-u) * sin(u+PI/4.));
 }
 
 // global variables : the kernel in use, defined in kernel.c, and related parameters
@@ -62,11 +97,35 @@ void select_kernel(int kernel_type, double prescribed_scale)
         break;
         case 5 : 
             current_kernel_type = 5;
-            current_kernel      = &kernel_Epanechnikov;          // select Epanechikov kernel
+            current_kernel      = &kernel_Epanechnikov;         // select Epanechikov kernel
         break;
         case 6 : 
             current_kernel_type = 6;
+            current_kernel      = &kernel_triweight;         
+        break;
+        case 7 : 
+            current_kernel_type = 7;
+            current_kernel      = &kernel_tricube;        
+        break;
+        case 8 : 
+            current_kernel_type = 8;
+            current_kernel      = &kernel_cosine;        
+        break;
+        case 9 : 
+            current_kernel_type = 9;
             current_kernel      = &kernel_exponential;          // select exponential kernel
+        break;
+        case 10 : 
+            current_kernel_type = 10;
+            current_kernel      = &kernel_logistic;             // select logistic kernel
+        break;
+        case 11 : 
+            current_kernel_type = 11;
+            current_kernel      = &kernel_sigmoid;              // select sigmoid kernel
+        break;
+        case 12 : 
+            current_kernel_type = 12;
+            current_kernel      = &kernel_Silverman;            // select Silverman kernel
         break;
         default: 
             current_kernel_type = 0;                            // no kernel
