@@ -15,9 +15,12 @@
 #define KERNEL_GAUSSIAN  0x0002
 #define KERNEL_TRIANGLE  0x0003
 
-double kernel_brickwall(double x, double d);
-double kernel_triangle (double x, double d);
-double kernel_Gaussian (double x, double d);
+double kernel_brickwall     (double x, double d);
+double kernel_Gaussian      (double x, double d);
+double kernel_triangle      (double x, double d);
+double kernel_quartique     (double x, double d);
+double kernel_Epanechnikov  (double x, double d);
+double kernel_exponential   (double x, double d);
 
 // global variables : the kernel in use, and the (bservation) scale for the kernel 
 // (all are defined in "kernel.c")

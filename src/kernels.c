@@ -10,15 +10,30 @@
 
 double kernel_brickwall(double x, double d) 
 {   (void)x; (void)d;
-    return 1.0;
-}
-
-double kernel_triangle(double x, double d) 
-{   return 1-x/d;
+    return 1.;
 }
 
 double kernel_Gaussian(double x, double d) 
 {   return exp(-(x/d)*(x/d)/2);
+}
+
+double kernel_triangle(double x, double d) 
+{   if (fabs(x/d) <1.) return 1-x/d;
+    else return 0.;
+}
+
+double kernel_quartique(double x, double d) 
+{   double a=kernel_Epanechnikov(x, d);
+    return a*a;
+}
+
+double kernel_Epanechnikov(double x, double d) 
+{   if (fabs(x/d) <1.) return 1.-(x/d)*(x/d);
+    else return 0.;
+}
+
+double kernel_exponential(double x, double d) 
+{   return exp(-(x/d));
 }
 
 // global variables : the kernel in use, defined in kernel.c, and related parameters
@@ -38,8 +53,20 @@ void select_kernel(int kernel_type, double prescribed_scale)
             current_kernel      = &kernel_Gaussian;             // select Gaussian kernel
         break;
         case 3 : 
-            current_kernel_type = 1;
+            current_kernel_type = 3;
             current_kernel      = &kernel_triangle;             // select triangle kernel
+        break;
+        case 4 : 
+            current_kernel_type = 4;
+            current_kernel      = &kernel_quartique;            // select quartique kernel
+        break;
+        case 5 : 
+            current_kernel_type = 5;
+            current_kernel      = &kernel_Epanechnikov;          // select Epanechikov kernel
+        break;
+        case 6 : 
+            current_kernel_type = 6;
+            current_kernel      = &kernel_exponential;          // select exponential kernel
         break;
         default: 
             current_kernel_type = 0;                            // no kernel

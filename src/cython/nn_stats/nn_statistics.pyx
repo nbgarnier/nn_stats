@@ -10,7 +10,6 @@ import  numpy as PNP    # shoud be useless here
 cimport numpy as CNP
 cimport commons
 cimport nn_statistics
-import commons as PC
 CNP.import_array()
 
 include "commons.pyx"   # for basic library manipulation
@@ -104,8 +103,8 @@ def compute_local_stats(double[:, ::1]  x,
     nn_statistics.tree_k_max=nn_max                     # if (-1) then auto set to 1/10 of available points in x
 
     if verbosity: 
-        print("computing moments of order 1 up to", order_max, "end=, ")
-        PC.get_kernel()
+        print("computing moments of order 1 up to", order_max, end=", ")
+        get_kernel()
 
     if (k[0]>0):
         if (k[nb_k-1]>=npts_in):    raise ValueError("imposed k is larger than the number of input points!")
