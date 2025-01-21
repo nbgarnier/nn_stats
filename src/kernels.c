@@ -6,6 +6,7 @@
 
 #include <math.h>
 #include "kernels.h"
+#include "library_commons.h"    // for PI
 
 
 double kernel_brickwall(double x, double d) 

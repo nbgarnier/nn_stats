@@ -67,7 +67,6 @@ double ANN_compute_stats_kernel_single_k(double *x, double *A, int k, double *R,
         for (i=0; i<N; i++)
         {   tmp    = (A+npts*d)[nnIdx[core][i]];
             weight = current_kernel(dists[core][i], current_obs_scale);
-            if ( (current_kernel_type==2) && (i==50) ) std::printf("%1.2f - %1.2f - %1.2f\n", dists[core][i], current_obs_scale, weight);
             prod   = 1.;
             for (j_moments=1; j_moments<=order_max; j_moments++)
             {   prod *= tmp;

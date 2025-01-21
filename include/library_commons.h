@@ -16,6 +16,12 @@
     #define my_NAN 0.0
 #endif
 
+#ifdef M_PI
+    #define PI M_PI
+#else
+    #define PI 3.141592653589793
+#endif
+
 /**********************************************************************************************************/
 extern const int k_default;
 extern int tree_k_max;      // for safety checks
