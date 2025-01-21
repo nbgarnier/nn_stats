@@ -38,7 +38,7 @@ The function returns (1 + order_max) Numpy arrays, in the following order:
 
 - You can select beforehand the number of threads over which the funcion will run.
 
-- You can select the kernel used to compute the local averages (new in V1.5). This is done either by specifying the correct option to the fuction  **"compute_local_stats"**, or by running the function **"set_kernel"** beforehand. See the script /example/test_kernels.py in the example directory.
+- You can select the kernel used to compute the local averages (new in V1.5). This is done either by specifying the correct option to the fuction  **"compute_local_stats"**, or by running the function **"set_kernel"** beforehand. See the script /example/test_kernels.py in the examples directory.
 
 # additional documentation
 
