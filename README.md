@@ -3,7 +3,7 @@ an efficient C/C++ library integrated with Python to estimate local averages (an
 This library relies on the [ANN library](http://www.cs.umd.edu/~mount/ANN/) by David Mount and Sunil Arya.
 
 - [v1.0](https://github.com/nbgarnier/nn_stats/releases/tag/v1.0) has been tested OK (central or natural moments OK, arbitrary order moments OK)
-- [v1.5](https://github.com/nbgarnier/nn_stats/) is the current development version; it includes kernel selection and is under testing.
+- [v1.5](https://github.com/nbgarnier/nn_stats/releases/tag/v1.5) is the current development version; it includes kernel selection and is under testing.
 
 Please cite any use of this library with the following DOI:  
 [![DOI](https://zenodo.org/badge/873066948.svg)](https://doi.org/10.5281/zenodo.14523934)
@@ -34,17 +34,8 @@ The function returns (1 + order_max) Numpy arrays, in the following order:
   * first, the radii (if k was provided) or the k (if R was provided).
   * then the moments of observable(s) "A" computed locally around the 'destination' locations provided with parameter "y", starting with the first moment (expected value), and up to the moment or order "order_max".
 
-# tuning
 
-- You can select beforehand the number of threads over which the main function will run. This is done with the function **"multithreading(nb_cores=int)"**. By default, the maximum physicaly available number of threads/cores is selected. You can acces this number with the function **"get_threads_number()"**.
-
-- You can change the verbosity of the library with the function **"set_verbosity(int level)"** or access it with the function **"get_verbosity()"**. The higher the verbosity level, the more messages are issued.
-
-- You can select the maximum number of neighbors to consider when performing a fixed-radius search (invoking the main function **"compute_local_stats()"** with the R= option): by default, the number of neighbors is at most 10% the number of available points (in the input array "x"). This is done with the function **"set_nn_max(int k)"**. You can access this number with the function **"get_nn_max()"**.
-
-- You can select the kernel used to compute the local averages (new in V1.5). This is done either by specifying the correct option to the main fuction  **"compute_local_stats"**, or by running the function **"set_kernel"** beforehand. See the script /example/test_kernels.py in the examples directory.
-
-# additional documentation
+# additional documentation and examples
 
 There are detailed examples in the examples/ subdirectory: please look at them to learn how to import and use the library, which should be as easy as:
 <pre><code>
@@ -66,6 +57,18 @@ k1, mean, var = ns.compute_local_stats(locations, values, loc_new, R=R)   # impo
 </code></pre>
 
 Using "help(ns.compute_local_stats)" should also give you a glimpse at available options.
+
+
+# tuning
+
+- You can select beforehand the number of threads over which the main function will run. This is done with the function **"multithreading(nb_cores=int)"**. By default, the largest number of threads/cores physically available is selected. You can acces this number with the function **"get_threads_number()"**.
+
+- You can change the verbosity of the library with the function **"set_verbosity(int level)"** or access it with the function **"get_verbosity()"**. The higher the verbosity level, the more messages are issued.
+
+- You can select the maximum number of neighbors to consider when performing a fixed-radius search (invoking the main function **"compute_local_stats()"** with the R= option): by default, the number of neighbors is at most 10% the number of available points (in the input array "x"). This is done with the function **"set_nn_max(int k)"**. You can access this number with the function **"get_nn_max()"**.
+
+- You can select the kernel used to compute the local averages (new in V1.5). This is done either by specifying the correct option to the main fuction  **"compute_local_stats"**, or by running the function **"set_kernel"** beforehand. See the script /example/test_kernels.py in the examples directory. type "help(ns.set_kernel)" for a list of available kernels. 
+
 
 # important remarks
 
@@ -117,6 +120,7 @@ k = ns.compute_local_stats(locations, A=values, y=loc_new, R=R, order_max=0)   #
 </code></pre>
 
 Note using the first way (and having a non-zero order_max) there will be (1+order_max) output variables (so 1+2=3 by default), which may be desirable depending on the style of your script, although returned moments variables should be empty. 
+
 
 # notes
 This is still under development, but has been tested OK in most common situations. Open an issue if some trouble arises that puzzles you.
