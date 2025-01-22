@@ -3,7 +3,7 @@ an efficient C/C++ library integrated with Python to estimate local averages (an
 This library relies on the [ANN library](http://www.cs.umd.edu/~mount/ANN/) by David Mount and Sunil Arya.
 
 - [v1.0](https://github.com/nbgarnier/nn_stats/releases/tag/v1.0) has been tested OK (central or natural moments OK, arbitrary order moments OK)
-- [v1.5](https://github.com/nbgarnier/nn_stats/) current dev version, with kernel selection: under testing.
+- [v1.5](https://github.com/nbgarnier/nn_stats/) is the current development version; it includes kernel selection and is under testing.
 
 Please cite any use of this library with the following DOI:  
 [![DOI](https://zenodo.org/badge/873066948.svg)](https://doi.org/10.5281/zenodo.14523934)
@@ -15,7 +15,7 @@ Please cite any use of this library with the following DOI:
 - then run "make python" to produce the library. This will both compile the library and install it in your python path, which depends on you current environment. You should select your environment first, then run "./configure" and "make python", in order to have the library and its functions available in your favored environment.
   
 # how to use in Python
-There is a single function, called **"compute_local_stats"**, which can be invoked in 2 different ways:
+There is a main function, called **"compute_local_stats"**, which can be invoked in 2 different ways:
   * by imposing a set of values of k (numbers of neighbors to consider)
   * by imposing a set of values of R (radii to consider)
 
@@ -36,9 +36,13 @@ The function returns (1 + order_max) Numpy arrays, in the following order:
 
 # tuning
 
-- You can select beforehand the number of threads over which the funcion will run.
+- You can select beforehand the number of threads over which the main function will run. This is done with the function **"multithreading(nb_cores=int)"**. By default, the maximum physicaly available number of threads/cores is selected. You can acces this number with the function **"get_threads_number()"**.
 
-- You can select the kernel used to compute the local averages (new in V1.5). This is done either by specifying the correct option to the fuction  **"compute_local_stats"**, or by running the function **"set_kernel"** beforehand. See the script /example/test_kernels.py in the examples directory.
+- You can change the verbosity of the library with the function **"set_verbosity(int level)"** or access it with the function **"get_verbosity()"**. The higher the verbosity level, the more messages are issued.
+
+- You can select the maximum number of neighbors to consider when performing a fixed-radius search (invoking the main function **"compute_local_stats()"** with the R= option): by default, the number of neighbors is at most 10% the number of available points (in the input array "x"). This is done with the function **"set_nn_max(int k)"**. You can access this number with the function **"get_nn_max()"**.
+
+- You can select the kernel used to compute the local averages (new in V1.5). This is done either by specifying the correct option to the main fuction  **"compute_local_stats"**, or by running the function **"set_kernel"** beforehand. See the script /example/test_kernels.py in the examples directory.
 
 # additional documentation
 
