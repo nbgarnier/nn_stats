@@ -201,7 +201,7 @@ double ANN_compute_stats_multi_k(double *x, double *A, k_vector k_vec, double *R
                 if (order_max>0)    
                 {   mom[d] = (double)N;             // convention for moment of order 0
                     mean   = mom[d + 1*nA] /N;         
-                    moments[npts_out*(nA*(k_vec.N*0 + ind_k) + d)] = mom[d];    // mean of centered data is 0, but we return the real mean (2025-01-24)
+                    moments[npts_out*(nA*(k_vec.N*0 + ind_k) + d)] = mean;    // mean of centered data is 0, but we return the real mean (2025-01-24)
                 }
                 for (j_moments=1; j_moments<order_max; j_moments++)
                 {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)]  = 0.0;
