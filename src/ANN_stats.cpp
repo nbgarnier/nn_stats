@@ -124,7 +124,7 @@ double ANN_compute_stats_single_k(double *x, double *A, int k, double *R, double
         else                    // central moments: https://en.wikipedia.org/wiki/Central_moment
         {   if (order_max>0)    
             {   mean = mom[1]/N;                        // mean (expected value) or initial data
-                moments[npts_out*(nA*0 + d)] = 0.;      // mean of centered data is 0
+                moments[npts_out*(nA*0 + d)] = mean;      // mean of centered data is 0, but we return the real mean (2025-01-24)
             }
             for (j_moments=1; j_moments<order_max; j_moments++)
             {   moments[npts_out*(nA*j_moments + d)] = 0.0;
@@ -201,7 +201,7 @@ double ANN_compute_stats_multi_k(double *x, double *A, k_vector k_vec, double *R
                 if (order_max>0)    
                 {   mom[d] = (double)N;             // convention for moment of order 0
                     mean   = mom[d + 1*nA] /N;         
-                    moments[npts_out*(nA*(k_vec.N*0 + ind_k) + d)] = 0.;    // central moment of order 1
+                    moments[npts_out*(nA*(k_vec.N*0 + ind_k) + d)] = mom[d];    // mean of centered data is 0, but we return the real mean (2025-01-24)
                 }
                 for (j_moments=1; j_moments<order_max; j_moments++)
                 {   moments[npts_out*(nA*(k_vec.N*j_moments + ind_k) + d)]  = 0.0;

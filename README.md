@@ -27,7 +27,7 @@ The following parameters can also be provided:
   * a set of observables values taken on the initial locations (parameter "A"). By default, this set is empty and no moments are computed.
   * a set of "destination" locations (parameter "y") where the statistics of observables will be computed. By default, he "initial" locations are used.
   * a maximal order for moments computation (parameter "order_max", new in v0.7.2). Moments of order 1, 2, ..., order_max will be computed. By default, order_max=2. Note that if you provide order_max=0, no moments will be computed, even if some observables (parameter "A") are provided.
-  * a boolean (parameter "centered") to indicate central moments (True) or natural moments (False) are requested. By default, observables are not centered, and natural moments are returned. (new in v0.7.3)
+  * a boolean (parameter "centered") to indicate central moments (True) or natural moments (False) are requested. By default, observables are not centered, and natural moments are returned. (new in v0.7.3). Note that even if you ask for central moments, the expected value (moment of order 1) of non-centered "x" will always be returned, as it is more meaningful than 0.
   * a maximal number of neighbors to consider when performing a fixed-radius search (parameter "nn_max", new in v0.8.0) (this may slow down the library, do it at your own risk!). By default, the function search for at most x.shape[1]/10 neighbors, i.e., 10% of the available data. You can specify to search for more points with this parameter. nn_max can take any value between 1 and (x.shape[1]-1).
   
 The function returns (1 + order_max) Numpy arrays, in the following order:
