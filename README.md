@@ -3,7 +3,7 @@ an efficient C/C++ library integrated with Python to estimate local averages (an
 This library relies on the [ANN library](http://www.cs.umd.edu/~mount/ANN/) by David Mount and Sunil Arya.
 
 - [v1.0](https://github.com/nbgarnier/nn_stats/releases/tag/v1.0) has been tested OK (central or natural moments OK, arbitrary order moments OK)
-- [v1.5](https://github.com/nbgarnier/nn_stats/releases/tag/v1.5) is the current development version; it includes kernel selection and is under testing.
+- [v1.5.1](https://github.com/nbgarnier/nn_stats/releases/tag/v1.5.1) is the current development version; it includes kernel selection and runs without known bugs.
 
 Please cite any use of this library with the following DOI:  
 [![DOI](https://zenodo.org/badge/873066948.svg)](https://doi.org/10.5281/zenodo.14523934)
